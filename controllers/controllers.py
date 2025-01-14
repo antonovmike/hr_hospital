@@ -19,4 +19,3 @@
 #         return http.request.render('hr_hospital.object', {
 #             'object': obj
 #         })
-

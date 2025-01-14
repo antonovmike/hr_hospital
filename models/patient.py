@@ -9,7 +9,7 @@ class Patient(models.Model):
     _name = 'hr.hospital.patient'
     _description = 'Patient'
 
-    name = fields.Char(string='Name', required=True)
+    name = fields.Char(required=True)
     active = fields.Boolean(default=True)
 
     physician_ids = fields.Many2many(

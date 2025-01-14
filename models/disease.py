@@ -9,5 +9,5 @@ class Disease(models.Model):
     _name = 'hr.hospital.disease'
     _description = 'Disease'
 
-    name = fields.Char(string='Name', required=True)
+    name = fields.Char(required=True)
     active = fields.Boolean(default=True)

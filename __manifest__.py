@@ -35,4 +35,3 @@
     'price': 0,
     'currency': 'EUR',
 }
-
