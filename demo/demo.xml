@@ -13,7 +13,6 @@
     <field name="active">True</field>
   </record>
 
-  <!-- Создание заболевания -->
   <record id="disease_1" model="hr.hospital.disease">
     <field name="name">Hypertension</field>
     <field name="active">True</field>
@@ -24,7 +23,6 @@
     <field name="active">True</field>
   </record>
 
-  <!-- Создание пациента -->
   <record id="patient_1" model="hr.hospital.patient">
     <field name="name">Alice Cooper</field>
     <field name="active">True</field>
