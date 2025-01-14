@@ -1,30 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
-<!--
-          <record id="object0" model="hr_hospital.hr_hospital">
-            <field name="name">Object 0</field>
-            <field name="value">0</field>
-          </record>
 
-          <record id="object1" model="hr_hospital.hr_hospital">
-            <field name="name">Object 1</field>
-            <field name="value">10</field>
-          </record>
+  <record id="physician_1" model="hr.hospital.physician">
+    <field name="name">Dr. John Smith</field>
+    <field name="specialty">Cardiology</field>
+    <field name="active">True</field>
+  </record>
 
-          <record id="object2" model="hr_hospital.hr_hospital">
-            <field name="name">Object 2</field>
-            <field name="value">20</field>
-          </record>
+  <record id="physician_2" model="hr.hospital.physician">
+    <field name="name">Dr. Jane Doe</field>
+    <field name="specialty">Cardiology</field>
+    <field name="active">True</field>
+  </record>
 
-          <record id="object3" model="hr_hospital.hr_hospital">
-            <field name="name">Object 3</field>
-            <field name="value">30</field>
-          </record>
+  <!-- Создание заболевания -->
+  <record id="disease_1" model="hr.hospital.disease">
+    <field name="name">Hypertension</field>
+    <field name="active">True</field>
+  </record>
 
-          <record id="object4" model="hr_hospital.hr_hospital">
-            <field name="name">Object 4</field>
-            <field name="value">40</field>
-          </record>
--->
-    </data>
+  <record id="disease_2" model="hr.hospital.disease">
+    <field name="name">Diabetes</field>
+    <field name="active">True</field>
+  </record>
+
+  <!-- Создание пациента -->
+  <record id="patient_1" model="hr.hospital.patient">
+    <field name="name">Alice Cooper</field>
+    <field name="active">True</field>
+    <field name="physician_ids" eval="[(4, ref('physician_1'))]"/>
+    <field name="disease_ids" eval="[(4, ref('disease_1'))]"/>
+  </record>
+
+  <record id="patient_2" model="hr.hospital.patient">
+    <field name="name">Bob Martin</field>
+    <field name="active">True</field>
+    <field name="physician_ids" eval="[(4, ref('physician_2'))]"/>
+    <field name="disease_ids" eval="[(4, ref('disease_2'))]"/>
+  </record>
+
+
 </odoo>
