@@ -31,7 +31,11 @@ class Patient(models.Model):
             if rec.date_of_birth:
                 rec.age = relativedelta(
                     date.today(),
-                    date(rec.date_of_birth.year, rec.date_of_birth.month, rec.date_of_birth.day),
+                    date(
+                        rec.date_of_birth.year,
+                        rec.date_of_birth.month,
+                        rec.date_of_birth.day
+                        ),
                 ).years
             else:
                 rec.age = False
