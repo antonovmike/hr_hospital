@@ -1,0 +1,84 @@
+Objective
+
+Add new functionality to the “hr_hospital” module to automate the work of physicians.
+
+Data
+Make changes to the module developed in block 2 “Creating modules”.
+
+Requirements
+
+1. Create an abstract human model. Modify the structure of the module models so that the following models are inherited from this abstract model: “Patient”, “Doctor”, “Contact person”. Add the following fields to the abstract model “Person”:
+   - Last Name, First Name
+   - Phone
+   - Email
+   - Photo
+   - Gender
+
+2. Add the following fields to the Patient model:
+   - Date of Birth
+   - Age to be calculated from the current date
+   - Passport details
+   - Contact person
+   - Personal physician
+
+3. Add the following fields to the Physician model:
+   - Specialty
+
+4. Create a new model “Diagnosis”, which contains the following data:
+   - Date of diagnosis
+   - Physician who made the diagnosis
+   - Patient
+   - Disease
+   - Treatment recommendations
+
+5. Add a hierarchical structure to the Diseases model. Use the data to add 4 disease records with a hierarchy.
+
+6. Add the following fields to the Patient Visits model:
+- Start date and time
+- Physician
+- Patient
+- Diagnosis
+6.1 Prohibit changing the time/date/physician of a visit that has already taken place.
+6.2 Prohibit deleting a visit with a diagnosis.
+
+7. Create a new “Personal Physician Change History” model that contains the following data:
+- Date and time the physician was established
+- Patient
+- Physician
+
+7.1 When a patient's personal physician is set or changed, a record of this model should be automatically created.
+
+8. Expand the Physician model with the Intern and Physician Mentor fields.
+8.1. If an intern diagnoses a patient, the mentor physician must add a comment to that diagnosis.
+8.2 Prohibit the selection of an intern as a mentoring physician.
+
+9. Create a new model “Physician Schedule” - time slots when a physician can perform patient appointments, which contains the following fields:
+- Physician
+- Date of appointment
+- Time of appointment
+- There should be a check that the appointments are not repeated.
+
+10. Expand the Patient Visits model with the ability to make an appointment with a doctor.
+10.1 Add a check to make it impossible to make an appointment for the same day twice.
+10.2 Verify that an appointment has not taken place.
+
+11. Create a wizard for mass reassignment of a personal physician. The wizard should be called with the “list” parameter of the “Patient” model.
+
+12. Create a report of diseases for a month, which is a temporary model.
+12.1 Add an option to select the year and month that calculates the diseases and the number of diagnoses for that disease.
+12.2. Wizard should be called from the “list” and “form” views of the model “Physician” from the system menu item “Print”.
+12.3 Add also the call of this wizard from a separate menu item of the “Hospital” module (it is desirable to add a separate general item “Reporting” and add the call of the wizard to it).
+
+13. Create a wizard to reschedule a doctor's appointment. Wizard should free up time and make an appointment for a different time/date/doctor.
+
+14. Create a wizard to fill in doctor appointment times for the week, make it possible to fill in different schedules for even/ odd weeks.
+
+15. Upload the module to your own (open source) repository on GitHub.
+
+Assignment review criteria:
+a. Complete fulfillment of all requirements of the assignment.
+b. Adherence to the correct directory and file structure of the module.
+c. Compliance with the correctness of the __manifest__.py file.
+d. Compliance with the naming guidelines for the module's files and objects.
+e. Passing the module linter checker without errors.
+f. The module must be installed on the system without errors.
