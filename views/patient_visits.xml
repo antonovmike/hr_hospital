@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+
+  <record id="hr_hospital_patient_visits_tree" model="ir.ui.view">
+    <field name="name">hr.hospital.patient.visits.tree</field>
+    <field name="model">hr.hospital.patient.visits</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="start_date_and_time"/>
+        <field name="physisian_id"/>
+        <field name="patient_id"/>
+        <field name="diagnosis_id"/>
+      </tree>
+    </field>
+  </record>
+
+  <record id="hr_hospital_patient_visits_form" model="ir.ui.view">
+    <field name="name">hr.hospital.patient.visits.form</field>
+    <field name="model">hr.hospital.patient.visits</field>
+    <field name="arch" type="xml">
+      <form string="Patient visits">
+        <header></header>
+        <sheet>
+          <group>
+        <field name="start_date_and_time"/>
+        <field name="physisian_id" widget="many2one"/>
+        <field name="patient_id" widget="many2one"/>
+        <field name="diagnosis_id" widget="many2one"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="hr_hospital_patient_visits_act_window" model="ir.actions.act_window">
+    <field name="name">Patient visits</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">hr.hospital.patient.visits</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+
+  <menuitem id="hr_hospital_patient_visits_menu"
+            action="hr_hospital_patient_visits_act_window"
+            parent="hr_hospital_catalog_menu"
+            name="Patient visits"
+            sequence="600"/>
+
+</odoo>

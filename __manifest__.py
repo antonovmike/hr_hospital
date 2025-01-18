@@ -23,6 +23,7 @@
         'views/patient.xml',
         'views/disease.xml',
         'views/diagnosis.xml',
+        'views/patient_visits.xml',
         # 'views/templates.xml',
         # 'demo/demo.xml',
     ],
