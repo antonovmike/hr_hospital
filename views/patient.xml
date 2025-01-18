@@ -6,7 +6,12 @@
     <field name="model">hr.hospital.patient</field>
     <field name="arch" type="xml">
       <tree>
-        <field name="name"/>
+        <field name="name_first"/>
+        <field name="name_last"/>
+        <field name="phone"/>
+        <field name="email"/>
+        <field name="photo"/>
+        <field name="gender"/>
         <field name="physician_ids"/>
         <field name="disease_ids"/>
       </tree>
@@ -21,7 +26,12 @@
         <header></header>
         <sheet>
           <group>
-            <field name="name"/>
+            <field name="name_first"/>
+            <field name="name_last"/>
+            <field name="phone"/>
+            <field name="email"/>
+            <field name="photo"/>
+            <field name="gender"/>
             <field name="physician_ids" widget="many2many_tags"/>
             <field name="disease_ids" widget="many2many_tags"/>
           </group>
