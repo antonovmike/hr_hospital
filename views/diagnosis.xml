@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+
+  <record id="hr_hospital_diagnosis_tree" model="ir.ui.view">
+    <field name="name">hr.hospital.diagnosis.tree</field>
+    <field name="model">hr.hospital.diagnosis</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="date_of_diagnosis"/>
+        <field name="physician"/>
+        <field name="patient_id"/>
+        <field name="disease_id"/>
+        <field name="treatment_recommendations"/>
+      </tree>
+    </field>
+  </record>
+
+  <record id="hr_hospital_diagnosis_form" model="ir.ui.view">
+    <field name="name">hr.hospital.diagnosis.form</field>
+    <field name="model">hr.hospital.diagnosis</field>
+    <field name="arch" type="xml">
+      <form string="">
+        <header></header>
+        <sheet>
+          <group>
+            <field name="date_of_diagnosis"/>
+            <field name="physician"/>
+            <field name="patient_id" widget="many2one"/>
+            <field name="disease_id" widget="many2one"/>
+            <field name="treatment_recommendations"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+
+  <record id="hr_hospital_diagnosis_act_window" model="ir.actions.act_window">
+    <field name="name">Diagnosis</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">hr.hospital.diagnosis</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+
+
+  <menuitem id="hr_hospital_diagnosis_menu"
+            action="hr_hospital_diagnosis_act_window"
+            parent="hr_hospital_catalog_menu"
+            name="Diagnosis"
+            sequence="500"/>
+
+</odoo>
