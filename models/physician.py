@@ -7,10 +7,9 @@ _logger = logging.getLogger(__name__)
 
 class Physician(models.Model):
     _name = 'hr.hospital.physician'
+    _inherit = 'hr_hospital.person'
     _description = 'Physician'
 
-    name = fields.Char(required=True)
-    active = fields.Boolean(default=True)
     specialty = fields.Char(default='Internal Medicine')
 
     patient_ids = fields.Many2many(
