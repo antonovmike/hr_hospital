@@ -23,7 +23,7 @@
         'views/patient.xml',
         'views/disease.xml',
         # 'views/templates.xml',
-        'demo/demo.xml',
+        # 'demo/demo.xml',
     ],
     # only loaded in demonstration mode
     'demo': [],
