@@ -12,8 +12,13 @@
         <field name="email"/>
         <field name="photo"/>
         <field name="gender"/>
-        <field name="physician_ids"/>
+        <field name="personal_physician"/>
         <field name="disease_ids"/>
+
+        <field name="date_of_birth"/>
+        <field name="age"/>
+        <field name="passport_details"/>
+        <field name="contact_person"/>
       </tree>
     </field>
   </record>
@@ -32,8 +37,13 @@
             <field name="email"/>
             <field name="photo"/>
             <field name="gender"/>
-            <field name="physician_ids" widget="many2many_tags"/>
+            <field name="personal_physician" widget="many2many_tags"/>
             <field name="disease_ids" widget="many2many_tags"/>
+
+            <field name="date_of_birth"/>
+            <field name="age"/>
+            <field name="passport_details"/>
+            <field name="contact_person"/>
           </group>
         </sheet>
       </form>
