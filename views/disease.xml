@@ -7,6 +7,7 @@
     <field name="arch" type="xml">
       <tree>
         <field name="name"/>
+        <field name="category_id" string="Category"/>
       </tree>
     </field>
   </record>
@@ -15,11 +16,12 @@
     <field name="name">hr.hospital.disease.form</field>
     <field name="model">hr.hospital.disease</field>
     <field name="arch" type="xml">
-      <form string="">
+      <form string="Disease">
         <header></header>
         <sheet>
           <group>
-            <field name="name"/>
+            <field name="name" string="Disease Name"/>
+            <field name="category_id" string="Disease Category"/>
           </group>
         </sheet>
       </form>
