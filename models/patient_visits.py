@@ -27,7 +27,7 @@ class PatientVisits(models.Model):
     def write(self, vals):
         """Override write to prevent modification of past visits."""
         for record in self:
-            if (record.start_date_and_time and 
+            if (record.start_date_and_time and
                     record.start_date_and_time < fields.Datetime.now()):
                 restricted_fields = {'start_date_and_time', 'physisian_id'}
                 if any(field in vals for field in restricted_fields):
