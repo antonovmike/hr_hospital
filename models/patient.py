@@ -17,13 +17,36 @@ class Patient(models.Model):
     passport_details = fields.Char()
     contact_person = fields.Char()
 
-    personal_physician = fields.Many2many(
+    personal_physician = fields.Many2one(
         comodel_name='hr.hospital.physician',
     )
 
     disease_ids = fields.Many2many(
         comodel_name='hr.hospital.disease',
     )
+
+    def write(self, vals):
+        """Override write to track physician changes."""
+        if 'personal_physician' in vals:
+            self.env['hr.hospital.physician.change.history'].create({
+                'date_established': fields.Datetime.now(),
+                'patient_id': self.id,
+                'physician_id': vals['personal_physician'],
+            })
+        return super().write(vals)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Override create to track initial physician assignment."""
+        records = super().create(vals_list)
+        for record in records:
+            if record.personal_physician:
+                self.env['hr.hospital.physician.change.history'].create({
+                    'date_established': fields.Datetime.now(),
+                    'patient_id': record.id,
+                    'physician_id': record.personal_physician.id,
+                })
+        return records
 
     @api.depends('date_of_birth')
     def _compute_age(self):
