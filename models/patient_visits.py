@@ -36,3 +36,13 @@ class PatientVisits(models.Model):
                         "visit that has already taken place."
                     )
         return super().write(vals)
+
+    def unlink(self):
+        """Prevent deletion of visits that have a diagnosis."""
+        for record in self:
+            if record.diagnosis_id:
+                raise ValidationError(
+                    "Cannot delete a visit that has a diagnosis. "
+                    "Remove the diagnosis first if deletion is necessary."
+                )
+        return super().unlink()
