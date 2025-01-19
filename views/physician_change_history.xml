@@ -30,11 +30,22 @@
     </field>
   </record>
 
+  <record id="hr_hospital_physician_change_history_search" model="ir.ui.view">
+    <field name="name">hr.hospital.physician.change.history.search</field>
+    <field name="model">hr.hospital.physician.change.history</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="patient_id"/>
+        <field name="physician_id"/>
+      </search>
+    </field>
+  </record>
+
   <record id="hr_hospital_physician_change_history_act_window" model="ir.actions.act_window">
     <field name="name">Physician Change History</field>
     <field name="type">ir.actions.act_window</field>
     <field name="res_model">hr.hospital.physician.change.history</field>
-    <field name="view_mode">tree,form</field>
+    <field name="view_mode">tree,form,search</field>
   </record>
 
   <menuitem id="hr_hospital_physician_change_history_menu"
