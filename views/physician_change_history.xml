@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+
+  <record id="hr_hospital_physician_change_history_tree" model="ir.ui.view">
+    <field name="name">hr.hospital.physician.change.history.tree</field>
+    <field name="model">hr.hospital.physician.change.history</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="date_established"/>
+        <field name="patient_id"/>
+        <field name="physician_id"/>
+      </tree>
+    </field>
+  </record>
+
+  <record id="hr_hospital_physician_change_history_form" model="ir.ui.view">
+    <field name="name">hr.hospital.physician.change.history.form</field>
+    <field name="model">hr.hospital.physician.change.history</field>
+    <field name="arch" type="xml">
+      <form string="Physician Change History">
+        <header></header>
+        <sheet>
+          <group>
+            <field name="date_established"/>
+            <field name="patient_id" widget="many2one"/>
+            <field name="physician_id" widget="many2one"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="hr_hospital_physician_change_history_act_window" model="ir.actions.act_window">
+    <field name="name">Physician Change History</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">hr.hospital.physician.change.history</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+
+  <menuitem id="hr_hospital_physician_change_history_menu"
+            action="hr_hospital_physician_change_history_act_window"
+            parent="hr_hospital_catalog_menu"
+            name="Physician Change History"
+            sequence="700"/>
+
+</odoo>
