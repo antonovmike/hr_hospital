@@ -29,6 +29,11 @@ class Physician(models.Model):
     patient_ids = fields.Many2many(
         comodel_name='hr.hospital.patient',
     )
+    user_id = fields.Many2one(
+        'res.users',
+        string='Related User',
+        help='The user account linked to this physician'
+    )
 
     @api.constrains('is_intern', 'mentor_id', 'intern_ids')
     def _check_intern_mentor_constraints(self):
