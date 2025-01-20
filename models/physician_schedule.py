@@ -1,5 +1,6 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
+from datetime import timedelta
 
 
 class PhysicianSchedule(models.Model):
@@ -37,3 +38,54 @@ class PhysicianSchedule(models.Model):
             minutes = record.appointment_time % 1
             if minutes not in [0.0, 0.5]:
                 raise ValidationError('Appointments can only be scheduled at hour or half-hour intervals')
+
+    @api.model
+    def generate_slots(self, physician_id, start_date, end_date=None):
+        """Generate slots for a physician between start_date and end_date."""
+        if not end_date:
+            end_date = start_date
+
+        # Generate time slots from 8:00 to 17:30 with 30-minute intervals
+        time_slots = []
+        current_time = 8.0
+        while current_time < 18.0:
+            time_slots.append(current_time)
+            current_time += 0.5
+
+        # Generate slots for each day
+        current_date = start_date
+        while current_date <= end_date:
+            for time_slot in time_slots:
+                # Check if slot already exists
+                existing = self.search([
+                    ('physician_id', '=', physician_id),
+                    ('appointment_date', '=', current_date),
+                    ('appointment_time', '=', time_slot)
+                ])
+                if not existing:
+                    self.create({
+                        'physician_id': physician_id,
+                        'appointment_date': current_date,
+                        'appointment_time': time_slot
+                    })
+            current_date += timedelta(days=1)
+
+    def generate_next_week_slots(self):
+        """Generate slots for next week for this physician."""
+        self.ensure_one()
+        today = fields.Date.today()
+        next_week_start = today + timedelta(days=(7 - today.weekday()))
+        next_week_end = next_week_start + timedelta(days=4)  # Monday to Friday
+        self.generate_slots(self.physician_id.id, next_week_start, next_week_end)
+
+    @api.model
+    def generate_slots_for_physician(self, physician_id):
+        """Generate slots for next 5 working days for a physician."""
+        today = fields.Date.today()
+        # Find next Monday if today is weekend
+        if today.weekday() > 4:  # Saturday or Sunday
+            start_date = today + timedelta(days=(7 - today.weekday()))
+        else:
+            start_date = today
+        end_date = start_date + timedelta(days=4)  # 5 working days
+        self.generate_slots(physician_id, start_date, end_date)

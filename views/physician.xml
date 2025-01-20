@@ -7,9 +7,9 @@
     <field name="arch" type="xml">
       <tree string="Physicians">
         <field name="display_name"/>
-        <field name="specialty"/>
         <field name="is_intern"/>
         <field name="mentor_id"/>
+        <field name="specialty"/>
         <field name="phone"/>
         <field name="email"/>
       </tree>
@@ -21,7 +21,13 @@
     <field name="model">hr.hospital.physician</field>
     <field name="arch" type="xml">
       <form string="Physician">
-        <header></header>
+        <header>
+          <button name="generate_schedule_slots" 
+                  string="Generate Schedule Slots" 
+                  type="object" 
+                  class="oe_highlight"
+                  invisible="is_intern"/>
+        </header>
         <sheet>
           <group>
             <group>

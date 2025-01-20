@@ -44,3 +44,18 @@ class Physician(models.Model):
                 raise ValidationError('Interns cannot be mentors to other physicians')
             if physician.mentor_id and physician.mentor_id.is_intern:
                 raise ValidationError('An intern cannot be assigned as a mentor')
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for record in records:
+            if not record.is_intern:
+                self.env['hr.hospital.physician.schedule'].generate_slots_for_physician(record.id)
+        return records
+
+    def generate_schedule_slots(self):
+        """Action to generate schedule slots for the physician."""
+        self.ensure_one()
+        if self.is_intern:
+            raise ValidationError("Cannot generate schedule slots for interns")
+        self.env['hr.hospital.physician.schedule'].generate_slots_for_physician(self.id)
