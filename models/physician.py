@@ -11,13 +11,13 @@ class Physician(models.Model):
     _inherit = 'hr_hospital.person'
     _description = 'Physician'
 
+    name = fields.Char(required=True)
     specialty = fields.Char(default='Internal Medicine')
-    is_intern = fields.Boolean(string='Is Intern', default=False)
+    is_intern = fields.Boolean(string='Is Intern')
     mentor_id = fields.Many2one(
         'hr.hospital.physician',
         string='Mentor',
-        domain=[('is_intern', '=', False)],
-        help='Supervising physician for interns'
+        domain=[('is_intern', '=', False)]
     )
     intern_ids = fields.One2many(
         'hr.hospital.physician',
@@ -25,14 +25,12 @@ class Physician(models.Model):
         string='Interns',
         help='List of interns under supervision'
     )
-
     patient_ids = fields.Many2many(
         comodel_name='hr.hospital.patient',
     )
     user_id = fields.Many2one(
         'res.users',
-        string='Related User',
-        help='The user account linked to this physician'
+        string='Related User'
     )
 
     @api.constrains('is_intern', 'mentor_id', 'intern_ids')
@@ -50,7 +48,9 @@ class Physician(models.Model):
         records = super().create(vals_list)
         for record in records:
             if not record.is_intern:
-                self.env['hr.hospital.physician.schedule'].generate_slots_for_physician(record.id)
+                self.env['hr.hospital.physician.schedule'].generate_slots_for_physician(
+                    record.id
+                )
         return records
 
     def generate_schedule_slots(self):
@@ -58,4 +58,6 @@ class Physician(models.Model):
         self.ensure_one()
         if self.is_intern:
             raise ValidationError("Cannot generate schedule slots for interns")
-        self.env['hr.hospital.physician.schedule'].generate_slots_for_physician(self.id)
+        self.env['hr.hospital.physician.schedule'].generate_slots_for_physician(
+            self.id
+        )

@@ -11,7 +11,6 @@ class PhysicianChangeHistory(models.Model):
     _order = "date_established desc"
 
     date_established = fields.Datetime(
-        string="Date Established",
         required=True,
         default=fields.Datetime.now,
     )

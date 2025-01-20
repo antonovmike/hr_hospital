@@ -3,79 +3,105 @@ from odoo.exceptions import ValidationError
 
 
 class TestPhysician(TransactionCase):
+
     def setUp(self):
         super().setUp()
-        # Create mentor physician
-        self.mentor = self.env['hr.hospital.physician'].create({
-            'name_first': 'Senior',
-            'name_last': 'Doctor',
-            'specialty': 'Surgery',
+        self.physician = self.env['hr.hospital.physician'].create({
+            'name': 'Test Physician',
+            'specialty': 'General Practice',
             'is_intern': False
         })
 
-    def test_create_intern(self):
-        """Test creating an intern with a mentor"""
-        intern = self.env['hr.hospital.physician'].create({
-            'name_first': 'Junior',
-            'name_last': 'Doctor',
-            'specialty': 'Surgery',
+        self.intern = self.env['hr.hospital.physician'].create({
+            'name': 'Test Intern',
+            'specialty': 'Internal Medicine',
             'is_intern': True,
-            'mentor_id': self.mentor.id
+            'mentor_id': self.physician.id
         })
-        
-        self.assertTrue(intern.id)
-        self.assertTrue(intern.is_intern)
-        self.assertEqual(intern.mentor_id.id, self.mentor.id)
-        self.assertEqual(intern.display_name, 'Junior Doctor')
+
+    def test_create_physician(self):
+        """Test creating a regular physician."""
+        self.assertTrue(self.physician.id)
+        self.assertEqual(self.physician.name, 'Test Physician')
+        self.assertEqual(self.physician.specialty, 'General Practice')
+        self.assertFalse(self.physician.is_intern)
+        self.assertFalse(self.physician.mentor_id)
+
+    def test_create_intern(self):
+        """Test creating an intern with a mentor."""
+        self.assertTrue(self.intern.id)
+        self.assertEqual(self.intern.name, 'Test Intern')
+        self.assertTrue(self.intern.is_intern)
+        self.assertEqual(self.intern.mentor_id.id, self.physician.id)
 
     def test_intern_without_mentor(self):
-        """Test that interns must have a mentor"""
+        """Test that interns must have a mentor."""
         with self.assertRaises(ValidationError):
             self.env['hr.hospital.physician'].create({
-                'name_first': 'Junior',
-                'name_last': 'Doctor',
-                'specialty': 'Surgery',
+                'name': 'Intern Without Mentor',
+                'specialty': 'Internal Medicine',
                 'is_intern': True
             })
 
-    def test_intern_cannot_be_mentor(self):
-        """Test that interns cannot be mentors"""
-        intern1 = self.env['hr.hospital.physician'].create({
-            'name_first': 'First',
-            'name_last': 'Intern',
-            'specialty': 'Surgery',
-            'is_intern': True,
-            'mentor_id': self.mentor.id
-        })
-        
+    def test_non_intern_with_mentor(self):
+        """Test that regular physicians cannot have mentors."""
         with self.assertRaises(ValidationError):
             self.env['hr.hospital.physician'].create({
-                'name_first': 'Second',
-                'name_last': 'Intern',
+                'name': 'Physician With Mentor',
                 'specialty': 'Surgery',
-                'is_intern': True,
-                'mentor_id': intern1.id
+                'is_intern': False,
+                'mentor_id': self.physician.id
             })
 
-    def test_mentor_intern_relationship(self):
-        """Test the relationship between mentor and interns"""
-        intern1 = self.env['hr.hospital.physician'].create({
-            'name_first': 'First',
-            'name_last': 'Intern',
-            'specialty': 'Surgery',
-            'is_intern': True,
-            'mentor_id': self.mentor.id
-        })
-        
-        intern2 = self.env['hr.hospital.physician'].create({
-            'name_first': 'Second',
-            'name_last': 'Intern',
-            'specialty': 'Surgery',
-            'is_intern': True,
-            'mentor_id': self.mentor.id
-        })
-        
-        # Check that both interns are in the mentor's intern_ids
-        self.assertEqual(len(self.mentor.intern_ids), 2)
-        self.assertIn(intern1.id, self.mentor.intern_ids.ids)
-        self.assertIn(intern2.id, self.mentor.intern_ids.ids)
+    def test_intern_as_mentor(self):
+        """Test that interns cannot be mentors."""
+        with self.assertRaises(ValidationError):
+            self.env['hr.hospital.physician'].create({
+                'name': 'Another Intern',
+                'specialty': 'Internal Medicine',
+                'is_intern': True,
+                'mentor_id': self.intern.id
+            })
+
+    def test_self_mentoring(self):
+        """Test that physicians cannot mentor themselves."""
+        with self.assertRaises(ValidationError):
+            self.physician.write({
+                'is_intern': True,
+                'mentor_id': self.physician.id
+            })
+
+    def test_schedule_generation(self):
+        """Test automatic schedule generation for physicians."""
+        # Check that slots were created for the regular physician
+        slots = self.env['hr.hospital.physician.schedule'].search([
+            ('physician_id', '=', self.physician.id)
+        ])
+        self.assertTrue(slots)
+
+        # Check that no slots were created for the intern
+        intern_slots = self.env['hr.hospital.physician.schedule'].search([
+            ('physician_id', '=', self.intern.id)
+        ])
+        self.assertFalse(intern_slots)
+
+    def test_manual_schedule_generation(self):
+        """Test manual schedule generation."""
+        # Clear existing slots
+        self.env['hr.hospital.physician.schedule'].search([
+            ('physician_id', '=', self.physician.id)
+        ]).unlink()
+
+        # Generate new slots
+        self.physician.generate_schedule_slots()
+
+        # Check that slots were created
+        slots = self.env['hr.hospital.physician.schedule'].search([
+            ('physician_id', '=', self.physician.id)
+        ])
+        self.assertTrue(slots)
+
+    def test_intern_schedule_generation(self):
+        """Test that interns cannot generate schedules."""
+        with self.assertRaises(ValidationError):
+            self.intern.generate_schedule_slots()

@@ -24,14 +24,12 @@ class Diagnosis(models.Model):
         required=True
     )
     treatment_recommendations = fields.Text(required=True)
-    
+
     needs_mentor_review = fields.Boolean(
-        string='Needs Mentor Review',
         compute='_compute_needs_mentor_review',
         store=True
     )
     mentor_comment = fields.Text(
-        string='Mentor Comment',
         help='Required comment from the mentor for diagnoses made by interns'
     )
     state = fields.Selection([
@@ -92,7 +90,7 @@ class Diagnosis(models.Model):
     @api.constrains('state', 'mentor_comment', 'physician')
     def _check_mentor_comment(self):
         for record in self:
-            if (record.physician.is_intern and 
-                record.state == 'reviewed' and 
+            if (record.physician.is_intern and
+                record.state == 'reviewed' and
                 not record.mentor_comment):
                 raise ValidationError('A mentor comment is required for intern diagnoses before they can be reviewed')
