@@ -39,8 +39,8 @@ class Physician(models.Model):
     def _check_intern_mentor_constraints(self):
         for physician in self:
             if physician.is_intern and not physician.mentor_id:
-                raise ValidationError('Interns must have a mentor assigned.')
-            if physician.is_intern and physician.intern_ids:
-                raise ValidationError('Interns cannot supervise other interns.')
+                raise ValidationError('Interns must have a mentor assigned')
+            if physician.intern_ids and physician.is_intern:
+                raise ValidationError('Interns cannot be mentors to other physicians')
             if physician.mentor_id and physician.mentor_id.is_intern:
-                raise ValidationError('A mentor cannot be an intern.')
+                raise ValidationError('An intern cannot be assigned as a mentor')
