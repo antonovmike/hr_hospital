@@ -25,6 +25,7 @@
         'views/diagnosis.xml',
         'views/patient_visits.xml',
         'views/physician_change_history.xml',
+        'views/physician_schedule.xml',
         # 'views/templates.xml',
         # 'demo/demo.xml',
     ],

@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <!-- Tree View -->
+    <record id="hr_hospital_physician_schedule_tree" model="ir.ui.view">
+        <field name="name">hr.hospital.physician.schedule.tree</field>
+        <field name="model">hr.hospital.physician.schedule</field>
+        <field name="arch" type="xml">
+            <tree string="Physician Schedules">
+                <field name="physician_id"/>
+                <field name="appointment_date"/>
+                <field name="appointment_time" widget="float_time"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="hr_hospital_physician_schedule_form" model="ir.ui.view">
+        <field name="name">hr.hospital.physician.schedule.form</field>
+        <field name="model">hr.hospital.physician.schedule</field>
+        <field name="arch" type="xml">
+            <form string="Physician Schedule">
+                <sheet>
+                    <group>
+                        <field name="physician_id"/>
+                        <field name="appointment_date"/>
+                        <field name="appointment_time" widget="float_time"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="hr_hospital_physician_schedule_search" model="ir.ui.view">
+        <field name="name">hr.hospital.physician.schedule.search</field>
+        <field name="model">hr.hospital.physician.schedule</field>
+        <field name="arch" type="xml">
+            <search string="Search Physician Schedule">
+                <field name="physician_id"/>
+                <field name="appointment_date"/>
+                <filter string="Today" name="today" domain="[('appointment_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="This Week" name="this_week" domain="[('appointment_date', '>=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d')), ('appointment_date', '&lt;=', (context_today() + datetime.timedelta(days=6-context_today().weekday())).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Physician" name="group_by_physician" context="{'group_by': 'physician_id'}"/>
+                    <filter string="Date" name="group_by_date" context="{'group_by': 'appointment_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="hr_hospital_physician_schedule_action" model="ir.actions.act_window">
+        <field name="name">Physician Schedule</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">hr.hospital.physician.schedule</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="hr_hospital_physician_schedule_menu"
+              name="Physician Schedule"
+              parent="hr_hospital_catalog_menu"
+              action="hr_hospital_physician_schedule_action"
+              sequence="30"/>
+</odoo>
