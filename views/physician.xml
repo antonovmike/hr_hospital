@@ -5,15 +5,13 @@
     <field name="name">hr.hospital.physician.tree</field>
     <field name="model">hr.hospital.physician</field>
     <field name="arch" type="xml">
-      <tree>
-        <field name="name_first"/>
-        <field name="name_last"/>
+      <tree string="Physicians">
+        <field name="display_name"/>
+        <field name="specialty"/>
+        <field name="is_intern"/>
+        <field name="mentor_id"/>
         <field name="phone"/>
         <field name="email"/>
-        <field name="photo"/>
-        <field name="gender"/>
-        <field name="specialty"/>
-        <field name="patient_ids"/>
       </tree>
     </field>
   </record>
@@ -22,19 +20,45 @@
     <field name="name">hr.hospital.physician.form</field>
     <field name="model">hr.hospital.physician</field>
     <field name="arch" type="xml">
-      <form string="">
+      <form string="Physician">
         <header></header>
         <sheet>
           <group>
-            <field name="name_first"/>
-            <field name="name_last"/>
-            <field name="phone"/>
-            <field name="email"/>
-            <field name="photo"/>
-            <field name="gender"/>
-            <field name="specialty"/>
-            <field name="patient_ids" widget="many2many_tags"/>
+            <group>
+              <field name="name_first"/>
+              <field name="name_last"/>
+              <field name="specialty"/>
+              <field name="is_intern"/>
+              <field name="mentor_id" invisible="not is_intern" required="is_intern"/>
+            </group>
+            <group>
+              <field name="phone"/>
+              <field name="email"/>
+              <field name="gender"/>
+            </group>
           </group>
+          <notebook>
+            <page string="Interns" invisible="is_intern">
+              <field name="intern_ids" readonly="1">
+                <tree>
+                  <field name="display_name"/>
+                  <field name="specialty"/>
+                  <field name="phone"/>
+                  <field name="email"/>
+                </tree>
+              </field>
+            </page>
+            <page string="Patients">
+              <field name="patient_ids">
+                <tree>
+                  <field name="display_name"/>
+                  <field name="date_of_birth"/>
+                  <field name="phone"/>
+                  <field name="email"/>
+                </tree>
+              </field>
+            </page>
+          </notebook>
         </sheet>
       </form>
     </field>
