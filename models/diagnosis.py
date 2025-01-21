@@ -101,7 +101,8 @@ class Diagnosis(models.Model):
         self.ensure_one()
         if self.physician.is_intern and not self.mentor_comment:
             raise ValidationError(
-                'Mentor comment is required before finalizing an intern diagnosis'
+                'Mentor comment is required before finalizing an intern '
+                'diagnosis'
             )
         self.state = 'final'
 
