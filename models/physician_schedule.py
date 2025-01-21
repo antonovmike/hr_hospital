@@ -127,7 +127,8 @@ class PhysicianSchedule(models.Model):
             if not 1 <= month <= 12:
                 raise ValidationError(_('Month must be between 1 and 12'))
             if year < fields.Date.today().year:
-                raise ValidationError(_('Cannot generate slots for past years'))
+                raise ValidationError(_(
+                    'Cannot generate slots for past years'))
 
             # Get the first and last day of the month
             last_day = monthrange(year, month)[1]
