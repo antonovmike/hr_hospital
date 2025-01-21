@@ -5,7 +5,7 @@
     <field name="name">hr.hospital.physician.tree</field>
     <field name="model">hr.hospital.physician</field>
     <field name="arch" type="xml">
-      <tree string="Physicians">
+      <tree>
         <field name="display_name"/>
         <field name="is_intern"/>
         <field name="mentor_id"/>

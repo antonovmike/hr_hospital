@@ -13,7 +13,7 @@ class Physician(models.Model):
 
     name = fields.Char(required=True)
     specialty = fields.Char(default='Internal Medicine')
-    is_intern = fields.Boolean(string='Is Intern')
+    is_intern = fields.Boolean()
     mentor_id = fields.Many2one(
         'hr.hospital.physician',
         string='Mentor',

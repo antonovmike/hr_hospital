@@ -5,7 +5,7 @@
         <field name="name">hr.hospital.physician.schedule.tree</field>
         <field name="model">hr.hospital.physician.schedule</field>
         <field name="arch" type="xml">
-            <tree string="Physician Schedules">
+            <tree>
                 <field name="physician_id"/>
                 <field name="appointment_date"/>
                 <field name="appointment_time" widget="float_time"/>

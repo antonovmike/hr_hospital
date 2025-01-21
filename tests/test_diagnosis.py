@@ -24,7 +24,7 @@ class TestDiagnosis(TransactionCase):
         self.disease_category = self.env['hr.hospital.disease.category'].create({
             'name': 'Test Category'
         })
-        
+
         # Create test disease
         self.disease = self.env['hr.hospital.disease'].create({
             'name': 'Test Disease',

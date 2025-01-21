@@ -5,7 +5,7 @@
     <field name="name">hr.hospital.diagnosis.tree</field>
     <field name="model">hr.hospital.diagnosis</field>
     <field name="arch" type="xml">
-      <tree string="Diagnoses" decoration-info="state == 'draft'" decoration-warning="state == 'pending_review'" decoration-success="state == 'final'">
+      <tree decoration-info="state == 'draft'" decoration-warning="state == 'pending_review'" decoration-success="state == 'final'">
         <field name="date_of_diagnosis"/>
         <field name="physician"/>
         <field name="patient_id"/>
