@@ -106,7 +106,8 @@ class PatientVisits(models.Model):
             today = fields.Date.today()
             now = fields.Datetime.now()
             if record.start_date < today or (
-                record.start_date == today and record.start_time < now.hour + now.minute / 60):
+                    record.start_date == today and
+                    record.start_time < now.hour + now.minute / 60):
                 raise ValidationError(_(
                     'You can not make an appointment in the past.'))
 
