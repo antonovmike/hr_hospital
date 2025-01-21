@@ -47,8 +47,14 @@ class Diagnosis(models.Model):
     @api.constrains('treatment_recommendations')
     def _check_treatment_recommendations(self):
         for record in self:
-            if not record.treatment_recommendations or not record.treatment_recommendations.strip():
-                raise ValidationError('Treatment recommendations cannot be empty')
+            has_recommendations = (
+                record.treatment_recommendations and
+                record.treatment_recommendations.strip()
+            )
+            if not has_recommendations:
+                raise ValidationError(
+                    'Treatment recommendations cannot be empty'
+                )
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -61,36 +67,54 @@ class Diagnosis(models.Model):
         return records
 
     def action_submit_for_review(self):
-        for record in self:
-            if not record.physician.is_intern:
-                raise ValidationError('Only diagnoses by interns need mentor review')
-            record.state = 'pending_review'
+        """Submit diagnosis for mentor review."""
+        self.ensure_one()
+        if not self.physician.is_intern:
+            raise ValidationError(
+                'Only diagnoses by interns need mentor review'
+            )
+        self.state = 'pending_review'
 
     def action_review(self):
-        for record in self:
-            # Only check for physician link during review
-            if record.state == 'pending_review':
-                # Get the physician record associated with the current user
-                reviewer_physician = self.env['hr.hospital.physician'].search([('user_id', '=', self.env.user.id)], limit=1)
-                if not reviewer_physician:
-                    raise ValidationError('Current user is not linked to any physician')
-                if reviewer_physician.id != record.physician.mentor_id.id:
-                    raise ValidationError('Only the assigned mentor can review this diagnosis')
-                if not record.mentor_comment:
-                    raise ValidationError('Mentor comment is required for review')
-                # Update state to reviewed after all validations pass
-                record.state = 'reviewed'
+        """Review intern's diagnosis."""
+        self.ensure_one()
+        reviewer_physician = self.env['hr.hospital.physician'].search([
+            ('user_id', '=', self.env.user.id)
+        ], limit=1)
+
+        if not reviewer_physician:
+            raise ValidationError(
+                'Current user is not linked to any physician'
+            )
+        if reviewer_physician != self.physician.mentor_id:
+            raise ValidationError(
+                'Only the assigned mentor can review this diagnosis'
+            )
+        if not self.mentor_comment:
+            raise ValidationError(
+                'Mentor comment is required for review'
+            )
+        self.state = 'reviewed'
 
     def action_finalize(self):
-        for record in self:
-            if record.physician.is_intern and not record.mentor_comment:
-                raise ValidationError('Mentor comment is required before finalizing an intern diagnosis')
-            record.state = 'final'
+        """Finalize the diagnosis."""
+        self.ensure_one()
+        if self.physician.is_intern and not self.mentor_comment:
+            raise ValidationError(
+                'Mentor comment is required before finalizing an intern diagnosis'
+            )
+        self.state = 'final'
 
     @api.constrains('state', 'mentor_comment', 'physician')
     def _check_mentor_comment(self):
         for record in self:
-            if (record.physician.is_intern and
+            needs_review = (
+                record.physician.is_intern and
                 record.state == 'reviewed' and
-                not record.mentor_comment):
-                raise ValidationError('A mentor comment is required for intern diagnoses before they can be reviewed')
+                not record.mentor_comment
+            )
+            if needs_review:
+                raise ValidationError(
+                    'A mentor comment is required for intern diagnoses '
+                    'before they can be reviewed'
+                )

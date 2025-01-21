@@ -33,24 +33,26 @@ class Physician(models.Model):
         string='Related User'
     )
 
-    @api.constrains('is_intern', 'mentor_id', 'intern_ids')
+    @api.constrains('is_intern', 'mentor_id')
     def _check_intern_mentor_constraints(self):
-        for physician in self:
-            if physician.is_intern and not physician.mentor_id:
-                raise ValidationError('Interns must have a mentor assigned')
-            if physician.intern_ids and physician.is_intern:
-                raise ValidationError('Interns cannot be mentors to other physicians')
-            if physician.mentor_id and physician.mentor_id.is_intern:
-                raise ValidationError('An intern cannot be assigned as a mentor')
+        for record in self:
+            if record.mentor_id and record.mentor_id.is_intern:
+                raise ValidationError(
+                    'An intern cannot be assigned as a mentor'
+                )
+            if not record.is_intern and record.mentor_id:
+                raise ValidationError(
+                    'Interns cannot be mentors to other physicians'
+                )
 
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
         for record in records:
             if not record.is_intern:
-                self.env['hr.hospital.physician.schedule'].generate_slots_for_physician(
-                    record.id
-                )
+                self.env[
+                    'hr.hospital.physician.schedule'
+                    ].generate_slots_for_physician(record.id)
         return records
 
     def generate_schedule_slots(self):
@@ -58,6 +60,6 @@ class Physician(models.Model):
         self.ensure_one()
         if self.is_intern:
             raise ValidationError("Cannot generate schedule slots for interns")
-        self.env['hr.hospital.physician.schedule'].generate_slots_for_physician(
-            self.id
-        )
+        self.env[
+            'hr.hospital.physician.schedule'].generate_slots_for_physician(
+            self.id)

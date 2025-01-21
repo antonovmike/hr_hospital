@@ -80,7 +80,8 @@ class PatientVisits(models.Model):
                         'half-hour intervals'
                     )
 
-            if all(k in vals for k in ['physician_id', 'start_date', 'start_time']):
+            required_keys = ['physician_id', 'start_date', 'start_time']
+            if all(k in vals for k in required_keys):
                 schedule = self.env['hr.hospital.physician.schedule'].search([
                     ('physician_id', '=', vals['physician_id']),
                     ('appointment_date', '=', vals['start_date']),
@@ -151,7 +152,7 @@ class PatientVisits(models.Model):
         self.ensure_one()
         if not self.schedule_id:
             raise ValidationError(
-                'Cannot schedule: No available slot found in physician\'s schedule'
+                'No available slot found in physician\'s schedule'
             )
         self._check_physician_availability()
         self.state = 'scheduled'
@@ -164,7 +165,9 @@ class PatientVisits(models.Model):
     def action_complete(self):
         self.ensure_one()
         if not self.diagnosis_id:
-            raise ValidationError('Please add a diagnosis before completing the visit')
+            raise ValidationError(
+                'Please add a diagnosis before completing the visit'
+            )
         self.state = 'completed'
 
     def action_cancel(self):
@@ -182,8 +185,8 @@ class PatientVisits(models.Model):
                 }
                 if any(field in vals for field in restricted_fields):
                     raise ValidationError(
-                        "Cannot modify the date/time, physician, or patient of a "
-                        "completed visit."
+                        'Cannot modify the date/time, physician, or patient '
+                        'of a completed visit.'
                     )
         return super().write(vals)
 

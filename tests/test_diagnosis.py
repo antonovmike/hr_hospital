@@ -21,9 +21,9 @@ class TestDiagnosis(TransactionCase):
         })
 
         # Create test disease category
-        self.disease_category = self.env['hr.hospital.disease.category'].create({
-            'name': 'Test Category'
-        })
+        self.disease_category = self.env[
+            'hr.hospital.disease.category'
+            ].create({'name': 'Test Category'})
 
         # Create test disease
         self.disease = self.env['hr.hospital.disease'].create({
@@ -34,8 +34,7 @@ class TestDiagnosis(TransactionCase):
         # Create disease category and disease
         self.disease_category_2 = self.env[
             'hr.hospital.disease.category'
-            ].create({
-            'name': 'Test Category 2'})
+            ].create({'name': 'Test Category 2'})
         self.disease_2 = self.env['hr.hospital.disease'].create({
             'name': 'Test Disease 2',
             'category_id': self.disease_category_2.id})
