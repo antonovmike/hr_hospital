@@ -81,17 +81,6 @@ class PatientVisits(models.Model):
 
             required_keys = ['physician_id', 'start_date', 'start_time']
             if all(k in vals for k in required_keys):
-                schedule = self.env['hr.hospital.physician.schedule'].search([
-                    ('physician_id', '=', vals['physician_id']),
-                    ('appointment_date', '=', vals['start_date']),
-                    ('appointment_time', '=', vals['start_time'])
-                ])
-                if not schedule:
-                    raise ValidationError(_(
-                        'Selected time slot is not available in physician\'s '
-                        'schedule'
-                    ))
-
                 existing = self.search([
                     ('physician_id', '=', vals['physician_id']),
                     ('start_date', '=', vals['start_date']),
