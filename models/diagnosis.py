@@ -1,6 +1,6 @@
 import logging
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
@@ -52,9 +52,9 @@ class Diagnosis(models.Model):
                 record.treatment_recommendations.strip()
             )
             if not has_recommendations:
-                raise ValidationError(
+                raise ValidationError(_(
                     'Treatment recommendations cannot be empty'
-                )
+                ))
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -70,9 +70,9 @@ class Diagnosis(models.Model):
         """Submit diagnosis for mentor review."""
         self.ensure_one()
         if not self.physician.is_intern:
-            raise ValidationError(
+            raise ValidationError(_(
                 'Only diagnoses by interns need mentor review'
-            )
+            ))
         self.state = 'pending_review'
 
     def action_review(self):
@@ -83,27 +83,27 @@ class Diagnosis(models.Model):
         ], limit=1)
 
         if not reviewer_physician:
-            raise ValidationError(
+            raise ValidationError(_(
                 'Current user is not linked to any physician'
-            )
+            ))
         if reviewer_physician != self.physician.mentor_id:
-            raise ValidationError(
+            raise ValidationError(_(
                 'Only the assigned mentor can review this diagnosis'
-            )
+            ))
         if not self.mentor_comment:
-            raise ValidationError(
+            raise ValidationError(_(
                 'Mentor comment is required for review'
-            )
+            ))
         self.state = 'reviewed'
 
     def action_finalize(self):
         """Finalize the diagnosis."""
         self.ensure_one()
         if self.physician.is_intern and not self.mentor_comment:
-            raise ValidationError(
+            raise ValidationError(_(
                 'Mentor comment is required before finalizing an intern '
                 'diagnosis'
-            )
+            ))
         self.state = 'final'
 
     @api.constrains('state', 'mentor_comment', 'physician')
@@ -115,7 +115,7 @@ class Diagnosis(models.Model):
                 not record.mentor_comment
             )
             if needs_review:
-                raise ValidationError(
+                raise ValidationError(_(
                     'A mentor comment is required for intern diagnoses '
                     'before they can be reviewed'
-                )
+                ))
