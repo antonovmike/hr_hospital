@@ -125,12 +125,13 @@ class PhysicianSchedule(models.Model):
         try:
             # Validate month and year
             if not 1 <= month <= 12:
-                raise ValidationError('Month must be between 1 and 12')
+                raise ValidationError(_('Month must be between 1 and 12'))
             if year < fields.Date.today().year:
-                raise ValidationError('Cannot generate slots for past years')
+                raise ValidationError(_('Cannot generate slots for past years'))
 
             # Get the first and last day of the month
-            _, last_day = monthrange(year, month)
+            # _, last_day = monthrange(year, month)
+            last_day = monthrange(year, month)[1]
             start_date = date(year, month, 1)
             end_date = date(year, month, last_day)
 
@@ -138,4 +139,4 @@ class PhysicianSchedule(models.Model):
             return self.generate_slots(physician_id, start_date, end_date)
         except ValueError as e:
             raise ValidationError(
-                'Invalid month/year combination: %s' % str(e))
+                _('Invalid month/year combination: %s') % str(e))
