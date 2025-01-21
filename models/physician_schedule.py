@@ -130,7 +130,6 @@ class PhysicianSchedule(models.Model):
                 raise ValidationError(_('Cannot generate slots for past years'))
 
             # Get the first and last day of the month
-            # _, last_day = monthrange(year, month)
             last_day = monthrange(year, month)[1]
             start_date = date(year, month, 1)
             end_date = date(year, month, last_day)
