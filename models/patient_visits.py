@@ -1,6 +1,5 @@
 import logging
-
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
@@ -12,7 +11,7 @@ class PatientVisits(models.Model):
     _sql_constraints = [
         ('unique_appointment',
          'UNIQUE(physician_id, start_date, start_time, state)',
-         'This time slot is already booked for this physician!')
+         _('This time slot is already booked for this physician!'))
     ]
 
     start_date = fields.Date(
@@ -25,11 +24,11 @@ class PatientVisits(models.Model):
         help='24-hour format (e.g., 13.5 for 1:30 PM)'
     )
     state = fields.Selection([
-        ('draft', 'Draft'),
-        ('scheduled', 'Scheduled'),
-        ('in_progress', 'In Progress'),
-        ('completed', 'Completed'),
-        ('cancelled', 'Cancelled')
+        ('draft', _('Draft')),
+        ('scheduled', _('Scheduled')),
+        ('in_progress', _('In Progress')),
+        ('completed', _('Completed')),
+        ('cancelled', _('Cancelled'))
     ], default='draft', required=True, string='Status')
     physician_id = fields.Many2one(
         comodel_name='hr.hospital.physician',
@@ -70,15 +69,15 @@ class PatientVisits(models.Model):
             if 'start_time' in vals:
                 time = vals['start_time']
                 if time < 8 or time >= 18:
-                    raise ValidationError(
+                    raise ValidationError(_(
                         'Appointment time must be between 8:00 and 17:59'
-                    )
+                    ))
                 minutes = time % 1
                 if minutes not in [0.0, 0.5]:
-                    raise ValidationError(
+                    raise ValidationError(_(
                         'Appointments can only be scheduled at hour or '
                         'half-hour intervals'
-                    )
+                    ))
 
             required_keys = ['physician_id', 'start_date', 'start_time']
             if all(k in vals for k in required_keys):
@@ -88,10 +87,10 @@ class PatientVisits(models.Model):
                     ('appointment_time', '=', vals['start_time'])
                 ])
                 if not schedule:
-                    raise ValidationError(
+                    raise ValidationError(_(
                         'Selected time slot is not available in physician\'s '
                         'schedule'
-                    )
+                    ))
 
                 existing = self.search([
                     ('physician_id', '=', vals['physician_id']),
@@ -100,9 +99,9 @@ class PatientVisits(models.Model):
                     ('state', 'not in', ['cancelled'])
                 ])
                 if existing:
-                    raise ValidationError(
+                    raise ValidationError(_(
                         'This time slot is already booked for another patient'
-                    )
+                    ))
 
         return super().create(vals_list)
 
@@ -110,16 +109,16 @@ class PatientVisits(models.Model):
     def _check_appointment_time(self):
         for record in self:
             if record.start_time < 8 or record.start_time >= 18:
-                raise ValidationError(
+                raise ValidationError(_(
                     'Appointment time must be between 8:00 and 17:59'
-                )
+                ))
 
             minutes = record.start_time % 1
             if minutes not in [0.0, 0.5]:
-                raise ValidationError(
+                raise ValidationError(_(
                     'Appointments can only be scheduled at hour or half-hour '
                     'intervals'
-                )
+                ))
 
     @api.constrains('physician_id', 'start_date', 'start_time', 'state')
     def _check_physician_availability(self):
@@ -131,10 +130,10 @@ class PatientVisits(models.Model):
                     ('appointment_time', '=', record.start_time)
                 ])
                 if not schedule:
-                    raise ValidationError(
+                    raise ValidationError(_(
                         'Selected time slot is not available in physician\'s '
                         'schedule'
-                    )
+                    ))
 
                 other_visit = self.search([
                     ('id', '!=', record.id),
@@ -144,16 +143,16 @@ class PatientVisits(models.Model):
                     ('state', 'not in', ['cancelled'])
                 ])
                 if other_visit:
-                    raise ValidationError(
+                    raise ValidationError(_(
                         'This time slot is already booked for another patient'
-                    )
+                    ))
 
     def action_schedule(self):
         self.ensure_one()
         if not self.schedule_id:
-            raise ValidationError(
+            raise ValidationError(_(
                 'No available slot found in physician\'s schedule'
-            )
+            ))
         self._check_physician_availability()
         self.state = 'scheduled'
         return True
@@ -165,15 +164,15 @@ class PatientVisits(models.Model):
     def action_complete(self):
         self.ensure_one()
         if not self.diagnosis_id:
-            raise ValidationError(
+            raise ValidationError(_(
                 'Please add a diagnosis before completing the visit'
-            )
+            ))
         self.state = 'completed'
 
     def action_cancel(self):
         self.ensure_one()
         if self.state == 'completed':
-            raise ValidationError('Cannot cancel a completed visit')
+            raise ValidationError(_('Cannot cancel a completed visit'))
         self.state = 'cancelled'
 
     def write(self, vals):
@@ -184,18 +183,18 @@ class PatientVisits(models.Model):
                     'start_date', 'start_time', 'physician_id', 'patient_id'
                 }
                 if any(field in vals for field in restricted_fields):
-                    raise ValidationError(
+                    raise ValidationError(_(
                         'Cannot modify the date/time, physician, or patient '
                         'of a completed visit.'
-                    )
+                    ))
         return super().write(vals)
 
     def unlink(self):
         """Prevent deletion of completed visits or visits with diagnosis."""
         for record in self:
             if record.state == 'completed' or record.diagnosis_id:
-                raise ValidationError(
+                raise ValidationError(_(
                     "Cannot delete a completed visit or a visit that has a "
                     "diagnosis. Cancel the visit instead if necessary."
-                )
+                ))
         return super().unlink()
