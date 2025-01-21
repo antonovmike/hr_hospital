@@ -48,8 +48,22 @@ class PhysicianSchedule(models.Model):
     @api.model
     def generate_slots(self, physician_id, start_date, end_date=None):
         """Generate slots for a physician between start_date and end_date."""
+        # Check if physician exists and is not an intern
+        physician = self.env['hr.hospital.physician'].browse(physician_id)
+        if not physician.exists():
+            raise ValidationError(_('Physician not found'))
+        if physician.is_intern:
+            raise ValidationError(_('Cannot generate schedule for interns'))
+
         if not end_date:
             end_date = start_date
+
+        # Check dates
+        today = fields.Date.today()
+        if start_date < today:
+            raise ValidationError(_('Cannot generate slots for past dates'))
+        if end_date < start_date:
+            raise ValidationError(_('End date cannot be before start date'))
 
         # Generate time slots from 8:00 to 17:30 with 30-minute intervals
         time_slots = []
@@ -77,6 +91,7 @@ class PhysicianSchedule(models.Model):
                             'appointment_time': time_slot
                         })
             current_date += timedelta(days=1)
+        return True
 
     def generate_next_week_slots(self):
         """Generate slots for next week for this physician."""
@@ -107,11 +122,20 @@ class PhysicianSchedule(models.Model):
     @api.model
     def generate_month_slots(self, physician_id, year, month):
         """Generate slots for an entire month for a physician."""
-        # Get the first and last day of the month
-        _, last_day = monthrange(year, month)
-        start_date = date(year, month, 1)
-        end_date = date(year, month, last_day)
+        try:
+            # Validate month and year
+            if not 1 <= month <= 12:
+                raise ValidationError('Month must be between 1 and 12')
+            if year < fields.Date.today().year:
+                raise ValidationError('Cannot generate slots for past years')
 
-        # Generate slots for the entire month
-        self.generate_slots(physician_id, start_date, end_date)
-        return True
+            # Get the first and last day of the month
+            _, last_day = monthrange(year, month)
+            start_date = date(year, month, 1)
+            end_date = date(year, month, last_day)
+
+            # Generate slots
+            return self.generate_slots(physician_id, start_date, end_date)
+        except ValueError as e:
+            raise ValidationError(
+                'Invalid month/year combination: %s' % str(e))
