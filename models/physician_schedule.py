@@ -1,5 +1,5 @@
 from datetime import timedelta
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
 
@@ -32,17 +32,17 @@ class PhysicianSchedule(models.Model):
         for record in self:
             # Check if time is between 8 and 18
             if record.appointment_time < 8 or record.appointment_time >= 18:
-                raise ValidationError(
+                raise ValidationError(_(
                     'Appointment time must be between 8:00 and 17:59'
-                )
+                ))
 
             # Check if minutes are either .0 or .5 (30 minutes intervals)
             minutes = record.appointment_time % 1
             if minutes not in [0.0, 0.5]:
-                raise ValidationError(
+                raise ValidationError(_(
                     'Appointments can only be scheduled at hour or half-hour '
                     'intervals'
-                )
+                ))
 
     @api.model
     def generate_slots(self, physician_id, start_date, end_date=None):

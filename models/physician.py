@@ -1,6 +1,6 @@
 import logging
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
@@ -37,13 +37,13 @@ class Physician(models.Model):
     def _check_intern_mentor_constraints(self):
         for record in self:
             if record.mentor_id and record.mentor_id.is_intern:
-                raise ValidationError(
+                raise ValidationError(_(
                     'An intern cannot be assigned as a mentor'
-                )
+                ))
             if not record.is_intern and record.mentor_id:
-                raise ValidationError(
+                raise ValidationError(_(
                     'Interns cannot be mentors to other physicians'
-                )
+                ))
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -59,7 +59,8 @@ class Physician(models.Model):
         """Action to generate schedule slots for the physician."""
         self.ensure_one()
         if self.is_intern:
-            raise ValidationError("Cannot generate schedule slots for interns")
+            raise ValidationError(_(
+                "Cannot generate schedule slots for interns"))
         self.env[
             'hr.hospital.physician.schedule'].generate_slots_for_physician(
             self.id)
