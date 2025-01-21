@@ -11,7 +11,7 @@ class Physician(models.Model):
     _inherit = 'hr_hospital.person'
     _description = 'Physician'
 
-    name = fields.Char(required=True)
+    # name = fields.Char(required=True)
     specialty = fields.Char(default='Internal Medicine')
     is_intern = fields.Boolean()
     mentor_id = fields.Many2one(
@@ -36,6 +36,10 @@ class Physician(models.Model):
     @api.constrains('is_intern', 'mentor_id')
     def _check_intern_mentor_constraints(self):
         for record in self:
+            if record.is_intern and not record.mentor_id:
+                raise ValidationError(_(
+                    'Interns must have a mentor assigned'
+                ))
             if record.mentor_id and record.mentor_id.is_intern:
                 raise ValidationError(_(
                     'An intern cannot be assigned as a mentor'

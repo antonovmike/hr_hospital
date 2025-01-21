@@ -6,11 +6,13 @@ from odoo.exceptions import ValidationError
 class TestDiagnosis(TransactionCase):
     def setUp(self):
         super().setUp()
+
         # Create test physician
         self.physician = self.env['hr.hospital.physician'].create({
             'name_first': 'Test',
             'name_last': 'Physician',
-            'specialty': 'General Practice'
+            'specialty': 'General Practice',
+            'is_intern': False
         })
 
         # Create test patient
@@ -80,7 +82,8 @@ class TestDiagnosis(TransactionCase):
         # Create patient
         self.patient_2 = self.env['hr.hospital.patient'].create({
             'name_first': 'Test',
-            'name_last': 'Patient'
+            'name_last': 'Patient 2',
+            'date_of_birth': date(1990, 1, 1)
         })
 
     def test_create_diagnosis(self):

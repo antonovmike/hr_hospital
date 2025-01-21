@@ -7,13 +7,15 @@ class TestPhysician(TransactionCase):
     def setUp(self):
         super().setUp()
         self.physician = self.env['hr.hospital.physician'].create({
-            'name': 'Test Physician',
+            'name_first': 'Test',
+            'name_last': 'Physician',
             'specialty': 'General Practice',
             'is_intern': False
         })
 
         self.intern = self.env['hr.hospital.physician'].create({
-            'name': 'Test Intern',
+            'name_first': 'Test',
+            'name_last': 'Intern',
             'specialty': 'Internal Medicine',
             'is_intern': True,
             'mentor_id': self.physician.id
@@ -22,7 +24,7 @@ class TestPhysician(TransactionCase):
     def test_create_physician(self):
         """Test creating a regular physician."""
         self.assertTrue(self.physician.id)
-        self.assertEqual(self.physician.name, 'Test Physician')
+        self.assertEqual(self.physician.display_name, 'Test Physician')
         self.assertEqual(self.physician.specialty, 'General Practice')
         self.assertFalse(self.physician.is_intern)
         self.assertFalse(self.physician.mentor_id)
@@ -30,7 +32,7 @@ class TestPhysician(TransactionCase):
     def test_create_intern(self):
         """Test creating an intern with a mentor."""
         self.assertTrue(self.intern.id)
-        self.assertEqual(self.intern.name, 'Test Intern')
+        self.assertEqual(self.intern.display_name, 'Test Intern')
         self.assertTrue(self.intern.is_intern)
         self.assertEqual(self.intern.mentor_id.id, self.physician.id)
 
@@ -38,7 +40,8 @@ class TestPhysician(TransactionCase):
         """Test that interns must have a mentor."""
         with self.assertRaises(ValidationError):
             self.env['hr.hospital.physician'].create({
-                'name': 'Intern Without Mentor',
+                'name_first': 'Intern',
+                'name_last': 'Without Mentor',
                 'specialty': 'Internal Medicine',
                 'is_intern': True
             })
@@ -47,7 +50,8 @@ class TestPhysician(TransactionCase):
         """Test that regular physicians cannot have mentors."""
         with self.assertRaises(ValidationError):
             self.env['hr.hospital.physician'].create({
-                'name': 'Physician With Mentor',
+                'name_first': 'Physician',
+                'name_last': 'With Mentor',
                 'specialty': 'Surgery',
                 'is_intern': False,
                 'mentor_id': self.physician.id
@@ -57,7 +61,8 @@ class TestPhysician(TransactionCase):
         """Test that interns cannot be mentors."""
         with self.assertRaises(ValidationError):
             self.env['hr.hospital.physician'].create({
-                'name': 'Another Intern',
+                'name_first': 'Another',
+                'name_last': 'Intern',
                 'specialty': 'Internal Medicine',
                 'is_intern': True,
                 'mentor_id': self.intern.id
