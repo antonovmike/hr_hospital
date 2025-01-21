@@ -95,11 +95,11 @@ class PhysicianSchedule(models.Model):
         """Generate slots for a specific date for a physician."""
         if not target_date:
             target_date = fields.Date.today()
-        
+
         # Don't generate slots for weekends
         if target_date.weekday() > 4:  # Saturday or Sunday
             return False
-            
+
         # Generate slots for the specified date
         self.generate_slots(physician_id, target_date, target_date)
         return True
@@ -111,7 +111,7 @@ class PhysicianSchedule(models.Model):
         _, last_day = monthrange(year, month)
         start_date = date(year, month, 1)
         end_date = date(year, month, last_day)
-        
+
         # Generate slots for the entire month
         self.generate_slots(physician_id, start_date, end_date)
         return True
