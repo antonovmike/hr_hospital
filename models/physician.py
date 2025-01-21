@@ -11,7 +11,6 @@ class Physician(models.Model):
     _inherit = 'hr_hospital.person'
     _description = 'Physician'
 
-    # name = fields.Char(required=True)
     specialty = fields.Char(default='Internal Medicine')
     is_intern = fields.Boolean()
     mentor_id = fields.Many2one(
