@@ -102,6 +102,14 @@ class PatientVisits(models.Model):
                     'Appointments cannot be scheduled on weekends'
                 ))
 
+            # If the date of the new appointment is in the past
+            today = fields.Date.today()
+            now = fields.Datetime.now()
+            if record.start_date < today or (
+                record.start_date == today and record.start_time < now.hour + now.minute / 60):
+                raise ValidationError(_(
+                    'You can not make an appointment in the past.'))
+
     @api.constrains('physician_id', 'start_date', 'start_time', 'state')
     def _check_physician_availability(self):
         for record in self:
