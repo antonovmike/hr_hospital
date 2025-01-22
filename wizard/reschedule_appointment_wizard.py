@@ -56,8 +56,9 @@ class RescheduleAppointmentWizard(models.TransientModel):
             ('appointment_date', '=', self.date),
             ('appointment_time', '=', self.time)
         ], limit=1)
-        
-        if not slot and self.date.weekday() <= 4:  # Only create slots on weekdays
+
+        # Only create slots on weekdays
+        if not slot and self.date.weekday() <= 4:
             slot = Schedule.sudo().create({
                 'physician_id': self.physician_id.id,
                 'appointment_date': self.date,

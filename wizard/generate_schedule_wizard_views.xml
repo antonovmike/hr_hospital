@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_generate_schedule_wizard_form" model="ir.ui.view">
+        <field name="name">hr.hospital.generate.schedule.wizard.form</field>
+        <field name="model">hr.hospital.generate.schedule.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generate Schedule">
+                <sheet>
+                    <div class="alert alert-info" role="alert">
+                        This wizard will generate schedule slots for the selected physician.
+                        Slots will be created for weekdays (Monday-Friday) between 8:00 and 18:00
+                        at 30-minute intervals.
+                    </div>
+                    <group>
+                        <group>
+                            <field name="physician_id" 
+                                   options="{'no_create': True, 'no_open': True}"
+                                   domain="[('is_intern', '=', False)]"/>
+                            <field name="date_from"/>
+                        </group>
+                        <group>
+                            <field name="date_to"/>
+                            <field name="clear_existing"/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_generate_slots" 
+                            string="Generate" 
+                            type="object" 
+                            class="btn-primary"/>
+                    <button string="Cancel" 
+                            class="btn-secondary" 
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_generate_schedule_wizard" model="ir.actions.act_window">
+        <field name="name">Generate Schedule</field>
+        <field name="res_model">hr.hospital.generate.schedule.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_hr_hospital_physician_schedule"/>
+        <field name="binding_view_types">list,form</field>
+    </record>
+</odoo>

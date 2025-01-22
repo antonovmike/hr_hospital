@@ -88,7 +88,8 @@ class PatientVisits(models.Model):
                 existing_appointment = self.search([
                     ('patient_id', '=', vals['patient_id']),
                     ('start_date', '=', vals['start_date']),
-                    ('state', 'not in', ['cancelled'])  # Ignore cancelled appointments
+                    # Ignore cancelled appointments
+                    ('state', 'not in', ['cancelled'])
                 ], limit=1)
 
                 if existing_appointment:
