@@ -7,9 +7,24 @@
             <form string="Generate Disease Report">
                 <sheet>
                     <group>
-                        <field name="physician_ids" widget="many2many_tags"/>
-                        <field name="month"/>
+                        <group>
+                            <field name="physician_ids" widget="many2many_tags"/>
+                        </group>
+                        <group>
+                            <field name="year"/>
+                            <field name="month"/>
+                        </group>
                     </group>
+                    <notebook>
+                        <page string="Disease Statistics">
+                            <field name="disease_stats_ids" readonly="1">
+                                <tree>
+                                    <field name="disease_id"/>
+                                    <field name="count"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
                 <footer>
                     <button name="action_generate_report" 
