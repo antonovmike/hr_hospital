@@ -68,12 +68,16 @@ class RescheduleAppointmentWizard(models.TransientModel):
 
     @api.onchange('physician_id', 'date', 'time')
     def _check_availability(self):
+        """Check if the selected time slot is available.
+        Returns a warning dictionary if there are conflicts,
+        or None if everything is fine.
+        """
         if not all([self.physician_id, self.date, self.time]):
-            return
+            return None
 
         active_id = self._context.get('active_id')
         if not active_id:
-            return
+            return None
 
         # Check if the new time slot is available
         conflicting_visits = self.env['hr.hospital.patient.visits'].search([
@@ -94,11 +98,13 @@ class RescheduleAppointmentWizard(models.TransientModel):
                 }
             }
 
+        return None
+
     def action_reschedule(self):
         self.ensure_one()
         active_id = self._context.get('active_id')
         if not active_id:
-            return
+            return None
 
         visit = self.env['hr.hospital.patient.visits'].browse(active_id)
 

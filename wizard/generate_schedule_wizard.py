@@ -99,8 +99,11 @@ class GenerateScheduleWizard(models.TransientModel):
             current_date += timedelta(days=1)
 
         # Show success message
-        message = _('{} schedule slots have been generated for {}').format(
-            slots_created, self.physician_id.display_name)
+        message = _(
+            '%(count)d schedule slots have been generated for %(name)s') % {
+            'count': slots_created,
+            'name': self.physician_id.display_name
+        }
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
