@@ -78,8 +78,21 @@ class PatientVisits(models.Model):
                     raise ValidationError(_(
                         'This time slot is already booked for another patient'
                     ))
+            # Check if the patient is trying to create a duplicate appointment
+            # on the same day
+            if 'patient_id' in vals and 'start_date' in vals:
+                existing_appointment = self.search([
+                    ('patient_id', '=', vals['patient_id']),
+                    ('start_date', '=', vals['start_date']),
+                ], limit=1)
 
-        return super().create(vals_list)
+                if existing_appointment:
+                    raise ValidationError(_(
+                        'This patient already has an '
+                        'appointment on the specified date.'
+                    ))
+
+        return super(PatientVisits, self).create(vals_list)
 
     @api.constrains('start_time')
     def _check_appointment_time(self):
