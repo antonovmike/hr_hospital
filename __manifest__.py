@@ -29,6 +29,7 @@
         'wizard/mass_reassign_physician_wizard_view.xml',
         'wizard/physician_disease_report_wizard_view.xml',
         'reports/physician_disease_report.xml',
+        'wizard/reschedule_appointment_wizard_views.xml',
         # 'views/templates.xml',
         # 'demo/demo.xml',
     ],

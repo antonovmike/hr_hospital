@@ -66,6 +66,10 @@ class PatientVisits(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
+            # Skip validations if context flag is set
+            if self._context.get('skip_schedule_validation'):
+                continue
+
             required_keys = ['physician_id', 'start_date', 'start_time']
             if all(k in vals for k in required_keys):
                 existing = self.search([
@@ -84,6 +88,7 @@ class PatientVisits(models.Model):
                 existing_appointment = self.search([
                     ('patient_id', '=', vals['patient_id']),
                     ('start_date', '=', vals['start_date']),
+                    ('state', 'not in', ['cancelled'])  # Ignore cancelled appointments
                 ], limit=1)
 
                 if existing_appointment:
