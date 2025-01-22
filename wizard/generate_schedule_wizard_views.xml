@@ -8,8 +8,8 @@
                 <sheet>
                     <div class="alert alert-info" role="alert">
                         This wizard will generate schedule slots for the selected physician.
-                        Slots will be created for weekdays (Monday-Friday) between 8:00 and 18:00
-                        at 30-minute intervals.
+                        You can set different schedules for even and odd weeks.
+                        Even/odd weeks are determined by the ISO week number.
                     </div>
                     <group>
                         <group>
@@ -17,10 +17,20 @@
                                    options="{'no_create': True, 'no_open': True}"
                                    domain="[('is_intern', '=', False)]"/>
                             <field name="date_from"/>
-                        </group>
-                        <group>
                             <field name="date_to"/>
                             <field name="clear_existing"/>
+                        </group>
+                    </group>
+                    <group string="Even Week Schedule (ISO)">
+                        <group>
+                            <field name="even_week_morning"/>
+                            <field name="even_week_afternoon"/>
+                        </group>
+                    </group>
+                    <group string="Odd Week Schedule (ISO)">
+                        <group>
+                            <field name="odd_week_morning"/>
+                            <field name="odd_week_afternoon"/>
                         </group>
                     </group>
                 </sheet>

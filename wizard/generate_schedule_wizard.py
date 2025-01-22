@@ -27,6 +27,26 @@ class GenerateScheduleWizard(models.TransientModel):
         help='If checked, existing slots in the date range will be removed '
         'before generating new ones'
     )
+    # Even week schedule
+    even_week_morning = fields.Boolean(
+        string='Even Week Morning (8:00-13:00)',
+        default=True,
+        help='Schedule for morning shifts (8:00-13:00) on even weeks'
+    )
+    even_week_afternoon = fields.Boolean(
+        string='Even Week Afternoon (13:00-18:00)',
+        help='Schedule for afternoon shifts (13:00-18:00) on even weeks'
+    )
+    # Odd week schedule
+    odd_week_morning = fields.Boolean(
+        string='Odd Week Morning (8:00-13:00)',
+        help='Schedule for morning shifts (8:00-13:00) on odd weeks'
+    )
+    odd_week_afternoon = fields.Boolean(
+        string='Odd Week Afternoon (13:00-18:00)',
+        default=True,
+        help='Schedule for afternoon shifts (13:00-18:00) on odd weeks'
+    )
 
     @api.onchange('date_from')
     def _onchange_date_from(self):
@@ -47,14 +67,24 @@ class GenerateScheduleWizard(models.TransientModel):
                 raise ValidationError(_(
                     'Cannot generate slots for past dates'))
 
-    def _get_time_slots(self):
-        """Generate time slots from 8:00 to 17:30 with 30-minute intervals."""
+    def _get_time_slots(self, is_morning):
+        """Generate time slots for morning or afternoon shift."""
         slots = []
-        current_time = 8.0
-        while current_time < 18.0:
+        if is_morning:
+            current_time = 8.0
+            end_time = 13.0
+        else:
+            current_time = 13.0
+            end_time = 18.0
+
+        while current_time < end_time:
             slots.append(current_time)
             current_time += 0.5
         return slots
+
+    def _is_even_week(self, date):
+        """Check if the given date falls in an even week number."""
+        return date.isocalendar()[1] % 2 == 0
 
     def action_generate_slots(self):
         self.ensure_one()
@@ -76,26 +106,47 @@ class GenerateScheduleWizard(models.TransientModel):
 
         # Generate slots for each day
         current_date = self.date_from
-        time_slots = self._get_time_slots()
         slots_created = 0
 
         while current_date <= self.date_to:
             # Skip weekends
             if current_date.weekday() <= 4:  # Monday to Friday
-                for time_slot in time_slots:
-                    # Check if slot already exists
-                    existing = Schedule.search([
-                        ('physician_id', '=', self.physician_id.id),
-                        ('appointment_date', '=', current_date),
-                        ('appointment_time', '=', time_slot)
-                    ])
-                    if not existing:
-                        Schedule.create({
-                            'physician_id': self.physician_id.id,
-                            'appointment_date': current_date,
-                            'appointment_time': time_slot
-                        })
-                        slots_created += 1
+                is_even = self._is_even_week(current_date)
+
+                # Morning shift
+                if (is_even and self.even_week_morning) or \
+                   (not is_even and self.odd_week_morning):
+                    morning_slots = self._get_time_slots(True)
+                    for time_slot in morning_slots:
+                        if not Schedule.search([
+                            ('physician_id', '=', self.physician_id.id),
+                            ('appointment_date', '=', current_date),
+                            ('appointment_time', '=', time_slot)
+                        ], limit=1):
+                            Schedule.create({
+                                'physician_id': self.physician_id.id,
+                                'appointment_date': current_date,
+                                'appointment_time': time_slot
+                            })
+                            slots_created += 1
+
+                # Afternoon shift
+                if (is_even and self.even_week_afternoon) or \
+                   (not is_even and self.odd_week_afternoon):
+                    afternoon_slots = self._get_time_slots(False)
+                    for time_slot in afternoon_slots:
+                        if not Schedule.search([
+                            ('physician_id', '=', self.physician_id.id),
+                            ('appointment_date', '=', current_date),
+                            ('appointment_time', '=', time_slot)
+                        ], limit=1):
+                            Schedule.create({
+                                'physician_id': self.physician_id.id,
+                                'appointment_date': current_date,
+                                'appointment_time': time_slot
+                            })
+                            slots_created += 1
+
             current_date += timedelta(days=1)
 
         # Show success message
