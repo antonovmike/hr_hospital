@@ -167,18 +167,28 @@ class PatientVisits(models.Model):
         self.state = 'cancelled'
 
     def write(self, vals):
-        """Override write to prevent modification of completed visits."""
+        # Get the current date and time
+        current_datetime = fields.Datetime.now()
+
         for record in self:
-            if record.state == 'completed':
-                restricted_fields = {
-                    'start_date', 'start_time', 'physician_id', 'patient_id'
-                }
-                if any(field in vals for field in restricted_fields):
+            # Check if the appointment has already taken place
+            if record.start_date < current_datetime.date() or (
+                record.start_date == current_datetime.date() and
+                record.start_time < current_datetime.hour
+                    + current_datetime.minute / 60):
+
+                # If the appointment has passed, prohibit changes
+                # to the date, time, physician, or patient
+                if any(field in vals for field in [
+                        'start_date', 'start_time',
+                        'physician_id', 'patient_id']):
                     raise ValidationError(_(
-                        'Cannot modify the date/time, physician, or patient '
-                        'of a completed visit.'
-                    ))
-        return super().write(vals)
+                        'This appointment has already taken '
+                        'place and cannot be modified.'
+                        ))
+
+        # Call the super method to proceed with the write operation
+        return super(PatientVisits, self).write(vals)
 
     def unlink(self):
         """Prevent deletion of completed visits or visits with diagnosis."""
@@ -186,6 +196,5 @@ class PatientVisits(models.Model):
             if record.state == 'completed' or record.diagnosis_id:
                 raise ValidationError(_(
                     "Cannot delete a completed visit or a visit that has a "
-                    "diagnosis. Cancel the visit instead if necessary."
-                ))
+                    "diagnosis. Cancel the visit instead if necessary."))
         return super().unlink()
