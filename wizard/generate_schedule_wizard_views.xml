@@ -47,7 +47,7 @@
         </field>
     </record>
 
-    <record id="action_generate_schedule_wizard" model="ir.actions.act_window">
+    <record id="wizard_generate_schedule_action" model="ir.actions.act_window">
         <field name="name">Generate Schedule</field>
         <field name="res_model">hr.hospital.generate.schedule.wizard</field>
         <field name="view_mode">form</field>

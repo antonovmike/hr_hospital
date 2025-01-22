@@ -6,6 +6,12 @@
         <field name="model">hr.hospital.physician.schedule</field>
         <field name="arch" type="xml">
             <tree>
+                <header>
+                    <button name="%(wizard_generate_schedule_action)d"
+                            string="Generate Schedule"
+                            type="action"
+                            class="btn-primary"/>
+                </header>
                 <field name="physician_id"/>
                 <field name="appointment_date"/>
                 <field name="appointment_time" widget="float_time"/>
@@ -19,6 +25,12 @@
         <field name="model">hr.hospital.physician.schedule</field>
         <field name="arch" type="xml">
             <form string="Physician Schedule">
+                <header>
+                    <button name="%(wizard_generate_schedule_action)d"
+                            string="Generate Schedule"
+                            type="action"
+                            class="btn-primary"/>
+                </header>
                 <sheet>
                     <group>
                         <field name="physician_id"/>
