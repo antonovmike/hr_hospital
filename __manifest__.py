@@ -27,6 +27,8 @@
         'views/physician_change_history.xml',
         'views/physician_schedule.xml',
         'wizard/mass_reassign_physician_wizard_view.xml',
+        'wizard/physician_disease_report_wizard_view.xml',
+        'reports/physician_disease_report.xml',
         # 'views/templates.xml',
         # 'demo/demo.xml',
     ],

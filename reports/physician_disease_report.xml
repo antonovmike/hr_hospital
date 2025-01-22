@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="report_physician_disease">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2>Disease Report</h2>
+                    <div class="row mt32 mb32">
+                        <div class="col-3">
+                            <strong>Period:</strong>
+                            <p t-esc="start_date" t-options='{"widget": "date"}'/>
+                            to
+                            <p t-esc="end_date" t-options='{"widget": "date"}'/>
+                        </div>
+                        <div class="col-9">
+                            <strong>Physicians:</strong>
+                            <p t-foreach="physicians" t-as="physician">
+                                <span t-field="physician.name"/>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Disease</th>
+                                <th class="text-right">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="disease_stats" t-as="stat">
+                                <td><span t-esc="stat[1]"/></td>
+                                <td class="text-right"><span t-esc="stat[2]"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_physician_disease_report" model="ir.actions.report">
+        <field name="name">Disease Report</field>
+        <field name="model">hr.hospital.physician.disease.report.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">hr_hospital.report_physician_disease</field>
+        <field name="report_file">hr_hospital.report_physician_disease</field>
+        <field name="binding_model_id" ref="model_hr_hospital_physician"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>
