@@ -11,7 +11,7 @@
     'license': 'OPL-1',
     'version': '17.0.0.0.0',
 
-    'depends': ['base'],
+    'depends': ['base', 'web'],
 
     'external_dependencies': {'python': [], },
 
