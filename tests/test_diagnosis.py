@@ -212,3 +212,77 @@ class TestDiagnosis(TransactionCase):
         diagnosis = diagnosis.with_user(self.mentor_user)
         with self.assertRaises(ValidationError):
             diagnosis.action_review()
+
+    def test_wrong_mentor_review(self):
+        """Test that only the assigned mentor can review a diagnosis"""
+        # Create another mentor
+        another_mentor = self.env['hr.hospital.physician'].create({
+            'name_first': 'Another',
+            'name_last': 'Mentor',
+            'specialty': 'Surgery',
+            'is_intern': False
+        })
+        another_mentor_user = self.env['res.users'].create({
+            'name': 'Another Mentor',
+            'login': 'another.mentor',
+            'email': 'another.mentor@test.com',
+            'groups_id': [(6, 0, [self.env.ref('base.group_user').id])]
+        })
+        another_mentor.write({'user_id': another_mentor_user.id})
+
+        # Create diagnosis by intern
+        diagnosis = self.env['hr.hospital.diagnosis'].create({
+            'date_of_diagnosis': '2025-01-20',
+            'physician': self.intern.id,
+            'patient_id': self.patient.id,
+            'disease_id': self.disease.id,
+            'treatment_recommendations': 'Test treatment'
+        })
+        
+        diagnosis.action_submit_for_review()
+        
+        # Try to review with wrong mentor
+        diagnosis = diagnosis.with_user(another_mentor_user)
+        diagnosis.write({'mentor_comment': 'Wrong mentor comment'})
+        
+        with self.assertRaises(ValidationError):
+            diagnosis.action_review()
+
+    def test_non_intern_review_attempt(self):
+        """Test that diagnoses by non-interns cannot be submitted for review"""
+        diagnosis = self.env['hr.hospital.diagnosis'].create({
+            'date_of_diagnosis': '2025-01-20',
+            'physician': self.physician_2.id,
+            'patient_id': self.patient.id,
+            'disease_id': self.disease.id,
+            'treatment_recommendations': 'Test treatment'
+        })
+        
+        with self.assertRaises(ValidationError):
+            diagnosis.action_submit_for_review()
+
+    def test_multiple_diagnoses_same_patient(self):
+        """Test creating multiple diagnoses for the same patient"""
+        # Create first diagnosis
+        diagnosis1 = self.env['hr.hospital.diagnosis'].create({
+            'date_of_diagnosis': '2025-01-20',
+            'physician': self.physician.id,
+            'patient_id': self.patient.id,
+            'disease_id': self.disease.id,
+            'treatment_recommendations': 'First treatment'
+        })
+        
+        # Create second diagnosis for same patient
+        diagnosis2 = self.env['hr.hospital.diagnosis'].create({
+            'date_of_diagnosis': '2025-01-21',
+            'physician': self.physician_2.id,
+            'patient_id': self.patient.id,
+            'disease_id': self.disease_2.id,
+            'treatment_recommendations': 'Second treatment'
+        })
+        
+        self.assertTrue(diagnosis1.id)
+        self.assertTrue(diagnosis2.id)
+        self.assertEqual(diagnosis1.patient_id, diagnosis2.patient_id)
+        self.assertNotEqual(diagnosis1.disease_id, diagnosis2.disease_id)
+        self.assertNotEqual(diagnosis1.date_of_diagnosis, diagnosis2.date_of_diagnosis)
