@@ -238,13 +238,13 @@ class TestDiagnosis(TransactionCase):
             'disease_id': self.disease.id,
             'treatment_recommendations': 'Test treatment'
         })
-        
+
         diagnosis.action_submit_for_review()
-        
+
         # Try to review with wrong mentor
         diagnosis = diagnosis.with_user(another_mentor_user)
         diagnosis.write({'mentor_comment': 'Wrong mentor comment'})
-        
+
         with self.assertRaises(ValidationError):
             diagnosis.action_review()
 
@@ -257,7 +257,7 @@ class TestDiagnosis(TransactionCase):
             'disease_id': self.disease.id,
             'treatment_recommendations': 'Test treatment'
         })
-        
+
         with self.assertRaises(ValidationError):
             diagnosis.action_submit_for_review()
 
@@ -271,7 +271,7 @@ class TestDiagnosis(TransactionCase):
             'disease_id': self.disease.id,
             'treatment_recommendations': 'First treatment'
         })
-        
+
         # Create second diagnosis for same patient
         diagnosis2 = self.env['hr.hospital.diagnosis'].create({
             'date_of_diagnosis': '2025-01-21',
@@ -280,9 +280,10 @@ class TestDiagnosis(TransactionCase):
             'disease_id': self.disease_2.id,
             'treatment_recommendations': 'Second treatment'
         })
-        
+
         self.assertTrue(diagnosis1.id)
         self.assertTrue(diagnosis2.id)
         self.assertEqual(diagnosis1.patient_id, diagnosis2.patient_id)
         self.assertNotEqual(diagnosis1.disease_id, diagnosis2.disease_id)
-        self.assertNotEqual(diagnosis1.date_of_diagnosis, diagnosis2.date_of_diagnosis)
+        self.assertNotEqual(
+            diagnosis1.date_of_diagnosis, diagnosis2.date_of_diagnosis)
