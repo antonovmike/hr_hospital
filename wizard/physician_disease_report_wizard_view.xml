@@ -44,9 +44,7 @@
         <field name="res_model">hr.hospital.physician.disease.report.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
-        <field name="binding_model_id" ref="model_hr_hospital_physician"/>
-        <field name="binding_type">report</field>
-        <field name="binding_view_types">list,form</field>
-        <field name="context">{'default_physician_ids': active_ids}</field>
+        <field name="view_id" ref="view_physician_disease_report_wizard_form"/>
+        <field name="context">{}</field>
     </record>
 </odoo>

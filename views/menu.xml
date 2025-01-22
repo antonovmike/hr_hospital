@@ -14,4 +14,17 @@
             parent="hr_hospital_main_menu"
             name="Settings" 
             sequence="9999"/>
+
+
+  <menuitem id="hr_hospital_reporting_menu"
+            parent="hr_hospital_main_menu"
+            name="Reporting"
+            sequence="200"/>
+
+  <menuitem id="hr_hospital_disease_report_menu"
+            parent="hr_hospital_reporting_menu"
+            name="Monthly Disease Report"
+            action="action_physician_disease_report_wizard"
+            sequence="10"/>
+
 </odoo>
