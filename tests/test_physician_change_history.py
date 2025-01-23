@@ -78,9 +78,12 @@ class TestPhysicianChangeHistory(TransactionCase):
         records = []
 
         for i in range(3):
+            physician_id = (
+                self.physician_1.id if i % 2 == 0 else self.physician_2.id
+            )
             record = self.env['hr.hospital.physician.change.history'].create({
                 'patient_id': patient.id,
-                'physician_id': self.physician_1.id if i % 2 == 0 else self.physician_2.id,
+                'physician_id': physician_id,
                 'date_established': date_base + timedelta(days=i)
             })
             records.append(record)
@@ -178,3 +181,48 @@ class TestPhysicianChangeHistory(TransactionCase):
         ])
 
         self.assertFalse(history)
+
+    def test_patient_physician_change(self):
+        """Test history record creation when changing patient's physician"""
+        # Create new patient with initial physician
+        patient = self.env['hr.hospital.patient'].create({
+            'name_first': 'Test',
+            'name_last': 'Patient',
+            'date_of_birth': '1995-01-01',
+            'personal_physician': self.physician_1.id,
+        })
+
+        # Verify initial history record
+        initial_history = self.env['hr.hospital.physician.change.history'].search([
+            ('patient_id', '=', patient.id),
+            ('physician_id', '=', self.physician_1.id),
+        ])
+        self.assertTrue(initial_history)
+        self.assertEqual(len(initial_history), 1)
+
+        # Change patient's physician
+        patient.write({
+            'personal_physician': self.physician_2.id,
+        })
+
+        # Get all history records for the patient
+        history_records = self.env['hr.hospital.physician.change.history'].search([
+            ('patient_id', '=', patient.id),
+        ], order='date_established desc')
+
+        # Should have 2 records now
+        self.assertEqual(len(history_records), 2)
+
+        # Verify both records exist with correct physicians
+        physician_ids = history_records.mapped('physician_id.id')
+        self.assertIn(self.physician_1.id, physician_ids)
+        self.assertIn(self.physician_2.id, physician_ids)
+
+        # Verify the second record's timestamp is not earlier than the first
+        self.assertGreaterEqual(
+            history_records[0].date_established,
+            history_records[1].date_established
+        )
+
+        # Verify current physician is physician_2
+        self.assertEqual(patient.personal_physician.id, self.physician_2.id)
