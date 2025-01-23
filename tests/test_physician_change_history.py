@@ -231,4 +231,111 @@ class TestPhysicianChangeHistory(TransactionCase):
 
     def test_multiple_patient_physician_changes(self):
         """Test multiple physician changes for a patient"""
-        pass
+        import time
+
+        # Create additional test physician
+        physician_3 = self.env['hr.hospital.physician'].create({
+            'name_first': 'Bob',
+            'name_last': 'Johnson',
+            'specialty': 'Surgery',
+            'is_intern': False
+        })
+
+        # Create two test patients with initial physicians
+        patient_1 = self.env['hr.hospital.patient'].create({
+            'name_first': 'Alice',
+            'name_last': 'Brown',
+            'date_of_birth': '1990-01-01',
+            'personal_physician': self.physician_1.id,
+        })
+        time.sleep(1)  # Ensure distinct timestamps
+
+        patient_2 = self.env['hr.hospital.patient'].create({
+            'name_first': 'Charlie',
+            'name_last': 'Davis',
+            'date_of_birth': '1985-05-15',
+            'personal_physician': self.physician_2.id,
+        })
+        time.sleep(1)  # Ensure distinct timestamps
+
+        # Make multiple physician changes for patient 1
+        patient_1.write({
+            'personal_physician': self.physician_2.id,
+        })
+        time.sleep(1)  # Ensure distinct timestamps
+
+        patient_1.write({
+            'personal_physician': physician_3.id,
+        })
+        time.sleep(1)  # Ensure distinct timestamps
+
+        # Make changes for patient 2
+        patient_2.write({
+            'personal_physician': physician_3.id,
+        })
+        time.sleep(1)  # Ensure distinct timestamps
+
+        patient_2.write({
+            'personal_physician': self.physician_1.id,
+        })
+
+        # Check history records for patient 1
+        patient_1_history = self.env[
+            'hr.hospital.physician.change.history'
+        ].search([
+            ('patient_id', '=', patient_1.id)
+        ], order='date_established desc')
+
+        # Verify patient 1 has 3 history records (initial + 2 changes)
+        self.assertEqual(len(patient_1_history), 3)
+
+        # Get the physician IDs in order
+        patient_1_physician_ids = patient_1_history.mapped('physician_id.id')
+        expected_patient_1_sequence = [
+            physician_3.id, self.physician_2.id, self.physician_1.id]
+
+        # Compare the sequences
+        self.assertEqual(
+            patient_1_physician_ids,
+            expected_patient_1_sequence,
+            "Patient 1's physician history sequence is incorrect"
+        )
+
+        # Check history records for patient 2
+        patient_2_history = self.env[
+            'hr.hospital.physician.change.history'
+        ].search([
+            ('patient_id', '=', patient_2.id)
+        ], order='date_established desc')
+
+        # Verify patient 2 has 3 history records (initial + 2 changes)
+        self.assertEqual(len(patient_2_history), 3)
+
+        # Get the physician IDs in order
+        patient_2_physician_ids = patient_2_history.mapped('physician_id.id')
+        expected_patient_2_sequence = [
+            self.physician_1.id, physician_3.id, self.physician_2.id]
+
+        # Compare the sequences
+        self.assertEqual(
+            patient_2_physician_ids,
+            expected_patient_2_sequence,
+            "Patient 2's physician history sequence is incorrect"
+        )
+
+        # Verify current physicians
+        self.assertEqual(patient_1.personal_physician.id, physician_3.id)
+        self.assertEqual(patient_2.personal_physician.id, self.physician_1.id)
+
+        # Verify chronological order of changes
+        for i in range(len(patient_1_history) - 1):
+            self.assertGreater(
+                patient_1_history[i].date_established,
+                patient_1_history[i + 1].date_established
+            )
+
+        for i in range(len(patient_2_history) - 1):
+            self.assertGreater(
+                patient_2_history[i].date_established,
+                patient_2_history[i + 1].date_established
+            )
