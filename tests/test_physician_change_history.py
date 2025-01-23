@@ -193,10 +193,11 @@ class TestPhysicianChangeHistory(TransactionCase):
         })
 
         # Verify initial history record
-        initial_history = self.env['hr.hospital.physician.change.history'].search([
-            ('patient_id', '=', patient.id),
-            ('physician_id', '=', self.physician_1.id),
-        ])
+        initial_history = self.env[
+            'hr.hospital.physician.change.history'].search([
+                ('patient_id', '=', patient.id),
+                ('physician_id', '=', self.physician_1.id),
+            ])
         self.assertTrue(initial_history)
         self.assertEqual(len(initial_history), 1)
 
@@ -206,9 +207,10 @@ class TestPhysicianChangeHistory(TransactionCase):
         })
 
         # Get all history records for the patient
-        history_records = self.env['hr.hospital.physician.change.history'].search([
-            ('patient_id', '=', patient.id),
-        ], order='date_established desc')
+        history_records = self.env[
+            'hr.hospital.physician.change.history'].search([
+                ('patient_id', '=', patient.id),
+            ], order='date_established desc')
 
         # Should have 2 records now
         self.assertEqual(len(history_records), 2)
@@ -226,3 +228,7 @@ class TestPhysicianChangeHistory(TransactionCase):
 
         # Verify current physician is physician_2
         self.assertEqual(patient.personal_physician.id, self.physician_2.id)
+
+    def test_multiple_patient_physician_changes(self):
+        """Test multiple physician changes for a patient"""
+        pass
