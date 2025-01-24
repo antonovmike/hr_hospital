@@ -162,6 +162,87 @@ class TestGenerateScheduleWizard(common.TransactionCase):
             f"(weekday: {test_date.weekday()})"
         )
 
+    def test_intern_creation_and_validation(self):
+        """Test intern creation and schedule generation validation"""
+        # First create a mentor
+        mentor = self.env['hr.hospital.physician'].create({
+            'name_first': 'Dr. Mentor',
+            'name_last': 'Senior',
+            'is_intern': False,
+        })
+
+        # Create an intern with mentor
+        intern = self.env['hr.hospital.physician'].create({
+            'name_first': 'Dr. Intern',
+            'name_last': 'Junior',
+            'is_intern': True,
+            'mentor_id': mentor.id,
+        })
+
+        # Verify intern was created correctly
+        self.assertTrue(intern.is_intern, "Should be marked as intern")
+        self.assertEqual(
+            intern.mentor_id.id,
+            mentor.id,
+            "Mentor should be correctly assigned"
+        )
+
+        # Try to generate schedule for intern
+        test_date = date.today() + timedelta(days=30)
+        # Ensure it's a weekday
+        while test_date.weekday() > 4:  # 5 = Saturday, 6 = Sunday
+            test_date += timedelta(days=1)
+
+        wizard = self.env['hr.hospital.generate.schedule.wizard'].create({
+            'physician_id': intern.id,
+            'date_from': test_date,
+            'date_to': test_date,
+            'clear_existing': True,
+            'even_week_morning': True,
+            'even_week_afternoon': True,
+        })
+
+        # Verify that schedule generation fails for intern
+        with self.assertRaises(
+            ValidationError,
+            msg="Should not be able to generate schedule for interns"
+        ):
+            wizard.action_generate_slots()
+
+        # Create schedule for mentor (should work)
+        mentor_wizard = self.env[
+            'hr.hospital.generate.schedule.wizard'
+        ].create({
+            'physician_id': mentor.id,
+            'date_from': test_date,
+            'date_to': test_date,
+            'clear_existing': True,
+            'even_week_morning': True,
+            'even_week_afternoon': True,
+        })
+        mentor_wizard.action_generate_slots()
+
+        # Verify mentor schedule was created
+        mentor_slots = self.env['hr.hospital.physician.schedule'].search([
+            ('physician_id', '=', mentor.id),
+            ('appointment_date', '=', test_date),
+        ])
+        self.assertTrue(
+            len(mentor_slots) > 0,
+            "Schedule should be generated for mentor"
+        )
+
+        # Verify no schedule was created for intern
+        intern_slots = self.env['hr.hospital.physician.schedule'].search([
+            ('physician_id', '=', intern.id),
+            ('appointment_date', '=', test_date),
+        ])
+        self.assertEqual(
+            len(intern_slots),
+            0,
+            "No schedule should exist for intern"
+        )
+
     def test_date_validation(self):
         """Test date validation constraints"""
         # Test end date before start date
