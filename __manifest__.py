@@ -22,6 +22,7 @@
         'wizard/physician_disease_report_wizard_view.xml',
         'wizard/reschedule_appointment_wizard_views.xml',
         'wizard/generate_schedule_wizard_views.xml',
+        'views/menu.xml',
         'views/physician.xml',
         'views/patient.xml',
         'views/patient_visits.xml',
@@ -29,7 +30,6 @@
         'views/disease.xml',
         'views/physician_change_history.xml',
         'views/physician_schedule.xml',
-        'views/menu.xml',
         'reports/physician_disease_report.xml',
     ],
     # only loaded in demonstration mode
