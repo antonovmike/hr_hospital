@@ -72,6 +72,15 @@ class PatientVisits(models.Model):
 
             required_keys = ['physician_id', 'start_date', 'start_time']
             if all(k in vals for k in required_keys):
+                # Lock the schedule slot first to prevent race conditions
+                self.env.cr.execute("""
+                    SELECT id FROM hr_hospital_physician_schedule
+                    WHERE physician_id = %s
+                    AND appointment_date = %s
+                    AND appointment_time = %s
+                    FOR UPDATE NOWAIT
+                """, (vals['physician_id'], vals['start_date'], vals['start_time']))
+                
                 existing = self.search([
                     ('physician_id', '=', vals['physician_id']),
                     ('start_date', '=', vals['start_date']),
@@ -82,6 +91,7 @@ class PatientVisits(models.Model):
                     raise ValidationError(_(
                         'This time slot is already booked for another patient'
                     ))
+
             # Check if the patient is trying to create a duplicate appointment
             # on the same day
             if 'patient_id' in vals and 'start_date' in vals:
@@ -159,12 +169,23 @@ class PatientVisits(models.Model):
 
     def action_schedule(self):
         self.ensure_one()
-        if not self.schedule_id:
-            raise ValidationError(_(
-                'No available slot found in physician\'s schedule'
-            ))
-        self._check_physician_availability()
-        self.state = 'scheduled'
+        # Use a savepoint to ensure atomic operation
+        with self.env.cr.savepoint():
+            # Lock the schedule slot
+            self.env.cr.execute("""
+                SELECT id FROM hr_hospital_physician_schedule
+                WHERE physician_id = %s
+                AND appointment_date = %s
+                AND appointment_time = %s
+                FOR UPDATE NOWAIT
+            """, (self.physician_id.id, self.start_date, self.start_time))
+            
+            if not self.schedule_id:
+                raise ValidationError(_(
+                    'No available slot found in physician\'s schedule'
+                ))
+            self._check_physician_availability()
+            self.state = 'scheduled'
         return True
 
     def action_start(self):
@@ -181,9 +202,18 @@ class PatientVisits(models.Model):
 
     def action_cancel(self):
         self.ensure_one()
-        if self.state == 'completed':
-            raise ValidationError(_('Cannot cancel a completed visit'))
-        self.state = 'cancelled'
+        # Use a savepoint to ensure atomic operation
+        with self.env.cr.savepoint():
+            if self.state == 'completed':
+                raise ValidationError(_('Cannot cancel a completed visit'))
+            # Lock the schedule slot
+            if self.schedule_id:
+                self.env.cr.execute("""
+                    SELECT id FROM hr_hospital_physician_schedule
+                    WHERE id = %s
+                    FOR UPDATE NOWAIT
+                """, (self.schedule_id.id,))
+            self.state = 'cancelled'
 
     def write(self, vals):
         # Get the current date and time
