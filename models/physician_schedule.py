@@ -7,6 +7,7 @@ from odoo.exceptions import ValidationError
 class PhysicianSchedule(models.Model):
     _name = 'hr.hospital.physician.schedule'
     _description = 'Physician Schedule'
+    _inherit = ['hr.hospital.time.validation.mixin']
     _sql_constraints = [
         ('unique_physician_datetime',
          'UNIQUE(physician_id, appointment_date, appointment_time)',
@@ -31,19 +32,7 @@ class PhysicianSchedule(models.Model):
     @api.constrains('appointment_time')
     def _check_appointment_time(self):
         for record in self:
-            # Check if time is between 8 and 18
-            if record.appointment_time < 8 or record.appointment_time >= 18:
-                raise ValidationError(_(
-                    'Appointment time must be between 8:00 and 17:59'
-                ))
-
-            # Check if minutes are either .0 or .5 (30 minutes intervals)
-            minutes = record.appointment_time % 1
-            if minutes not in [0.0, 0.5]:
-                raise ValidationError(_(
-                    'Appointments can only be scheduled at hour or half-hour '
-                    'intervals'
-                ))
+            self._validate_time_slot(record.appointment_time)
 
     @api.model
     def generate_slots(self, physician_id, start_date, end_date=None):

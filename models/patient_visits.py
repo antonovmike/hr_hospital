@@ -8,6 +8,7 @@ _logger = logging.getLogger(__name__)
 class PatientVisits(models.Model):
     _name = "hr.hospital.patient.visits"
     _description = "Patient Visits"
+    _inherit = ['hr.hospital.time.validation.mixin']
     _sql_constraints = [
         ('unique_appointment',
          'UNIQUE(physician_id, start_date, start_time)',
@@ -110,20 +111,11 @@ class PatientVisits(models.Model):
 
         return super(PatientVisits, self).create(vals_list)
 
-    @api.constrains('start_time')
+    @api.constrains('start_time', 'start_date')
     def _check_appointment_time(self):
         for record in self:
-            if record.start_time < 8 or record.start_time >= 18:
-                raise ValidationError(_(
-                    'Appointment time must be between 8:00 and 17:59'
-                ))
-
-            minutes = record.start_time % 1
-            if minutes not in [0.0, 0.5]:
-                raise ValidationError(_(
-                    'Appointments can only be scheduled at hour or half-hour '
-                    'intervals'
-                ))
+            # Use mixin for common time validations
+            self._validate_time_slot(record.start_time)
 
             # Check if it's a weekend
             if record.start_date and record.start_date.weekday() > 4:
