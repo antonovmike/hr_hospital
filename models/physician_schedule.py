@@ -97,6 +97,13 @@ class PhysicianSchedule(models.Model):
     @api.model
     def generate_slots_for_physician(self, physician_id, target_date=None):
         """Generate slots for a specific date for a physician."""
+        # Check if physician exists and is not an intern
+        physician = self.env['hr.hospital.physician'].browse(physician_id)
+        if not physician.exists():
+            raise ValidationError(_('Physician not found'))
+        if physician.is_intern:
+            raise ValidationError(_('Cannot generate schedule for interns'))
+            
         if not target_date:
             target_date = fields.Date.today()
 
