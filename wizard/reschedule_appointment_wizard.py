@@ -27,8 +27,8 @@ class RescheduleAppointmentWizard(models.TransientModel):
                     'active_id'))
             res.update({
                 'physician_id': visit.physician_id.id,
-                'date': visit.start_date,
-                'time': visit.start_time,
+                'date': visit.appointment_date,
+                'time': visit.appointment_time,
             })
         return res
 
@@ -82,8 +82,8 @@ class RescheduleAppointmentWizard(models.TransientModel):
         # Check if the new time slot is available
         conflicting_visits = self.env['hr.hospital.patient.visits'].search([
             ('physician_id', '=', self.physician_id.id),
-            ('start_date', '=', self.date),
-            ('start_time', '=', self.time),
+            ('appointment_date', '=', self.date),
+            ('appointment_time', '=', self.time),
             ('state', 'not in', ['cancelled']),
             ('id', '!=', active_id)
         ])
@@ -133,8 +133,8 @@ class RescheduleAppointmentWizard(models.TransientModel):
             mail_create_nosubscribe=True    # Prevent sending notifications
         ).create({
             'physician_id': self.physician_id.id,
-            'start_date': self.date,
-            'start_time': self.time,
+            'appointment_date': self.date,
+            'appointment_time': self.time,
             'state': 'scheduled',
             'patient_id': visit.patient_id.id,
             'notes': visit.notes,

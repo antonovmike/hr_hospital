@@ -6,8 +6,8 @@
     <field name="model">hr.hospital.patient.visits</field>
     <field name="arch" type="xml">
       <tree decoration-info="state == 'draft'" decoration-success="state == 'completed'" decoration-warning="state == 'in_progress'" decoration-danger="state == 'cancelled'">
-        <field name="start_date"/>
-        <field name="start_time" widget="float_time"/>
+        <field name="appointment_date"/>
+        <field name="appointment_time" widget="float_time"/>
         <field name="physician_id"/>
         <field name="patient_id"/>
         <field name="diagnosis_id"/>
@@ -35,8 +35,8 @@
         <sheet>
           <group>
             <group>
-              <field name="start_date" readonly="state not in ['draft']"/>
-              <field name="start_time" widget="float_time" readonly="state not in ['draft']"/>
+              <field name="appointment_date" readonly="state not in ['draft']"/>
+              <field name="appointment_time" widget="float_time" readonly="state not in ['draft']"/>
               <field name="physician_id" readonly="state not in ['draft']"/>
               <field name="patient_id" readonly="state not in ['draft']"/>
             </group>
@@ -62,11 +62,11 @@
       <search>
         <field name="patient_id"/>
         <field name="physician_id"/>
-        <field name="start_date"/>
+        <field name="appointment_date"/>
         <filter string="Today's Appointments" name="today" 
-                domain="[('start_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                domain="[('appointment_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
         <filter string="Upcoming" name="upcoming" 
-                domain="[('start_date', '>=', context_today().strftime('%Y-%m-%d')), ('state', 'in', ['draft', 'scheduled'])]"/>
+                domain="[('appointment_date', '>=', context_today().strftime('%Y-%m-%d')), ('state', 'in', ['draft', 'scheduled'])]"/>
         <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
         <filter string="Scheduled" name="scheduled" domain="[('state', '=', 'scheduled')]"/>
         <filter string="In Progress" name="in_progress" domain="[('state', '=', 'in_progress')]"/>
@@ -74,7 +74,7 @@
         <group expand="0" string="Group By">
           <filter string="Physician" name="physician" context="{'group_by': 'physician_id'}"/>
           <filter string="Patient" name="patient" context="{'group_by': 'patient_id'}"/>
-          <filter string="Date" name="date" context="{'group_by': 'start_date'}"/>
+          <filter string="Date" name="date" context="{'group_by': 'appointment_date'}"/>
           <filter string="Status" name="status" context="{'group_by': 'state'}"/>
         </group>
       </search>

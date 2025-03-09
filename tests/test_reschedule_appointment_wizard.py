@@ -48,8 +48,8 @@ class TestRescheduleAppointmentWizard(common.TransactionCase):
         self.visit = self.env['hr.hospital.patient.visits'].create({
             'physician_id': self.physician.id,
             'patient_id': self.patient.id,
-            'start_date': self.test_date,
-            'start_time': 9.0,
+            'appointment_date': self.test_date,
+            'appointment_time': 9.0,
             'state': 'scheduled',
         })
 
@@ -77,8 +77,8 @@ class TestRescheduleAppointmentWizard(common.TransactionCase):
         self.env['hr.hospital.patient.visits'].create({
             'physician_id': self.physician.id,
             'patient_id': self.patient2.id,  # Use second patient
-            'start_date': self.test_date,
-            'start_time': 10.0,
+            'appointment_date': self.test_date,
+            'appointment_time': 10.0,
             'state': 'scheduled',
         })
 
@@ -135,7 +135,7 @@ class TestRescheduleAppointmentWizard(common.TransactionCase):
             new_visit = self.env['hr.hospital.patient.visits'].browse(
                 result['res_id'])
             self.assertEqual(
-                new_visit.start_time, 10.0, "New time should be 10:00")
+                new_visit.appointment_time, 10.0, "New time should be 10:00")
             self.assertEqual(
                 new_visit.state, 'scheduled', "New visit should be scheduled")
             self.assertEqual(

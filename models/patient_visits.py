@@ -10,16 +10,16 @@ class PatientVisits(models.Model):
     _description = "Patient Visits"
     _inherit = ['hr.hospital.time.validation.mixin']
     _sql_constraints = [
-        ('unique_appointment',
-         'UNIQUE(physician_id, start_date, start_time)',
+        ('unique_physician_datetime',
+         'UNIQUE(physician_id, appointment_date, appointment_time)',
          _('This time slot is already booked for this physician!'))
     ]
 
-    start_date = fields.Date(
+    appointment_date = fields.Date(
         string='Appointment Date',
         required=True
     )
-    start_time = fields.Float(
+    appointment_time = fields.Float(
         string='Appointment Time',
         required=True,
         help='24-hour format (e.g., 13.5 for 1:30 PM)'
@@ -53,14 +53,14 @@ class PatientVisits(models.Model):
         store=True
     )
 
-    @api.depends('physician_id', 'start_date', 'start_time')
+    @api.depends('physician_id', 'appointment_date', 'appointment_time')
     def _compute_schedule_slot(self):
         for visit in self:
-            if visit.physician_id and visit.start_date and visit.start_time:
+            if visit.physician_id and visit.appointment_date and visit.appointment_time:
                 schedule = self.env['hr.hospital.physician.schedule'].search([
                     ('physician_id', '=', visit.physician_id.id),
-                    ('appointment_date', '=', visit.start_date),
-                    ('appointment_time', '=', visit.start_time)
+                    ('appointment_date', '=', visit.appointment_date),
+                    ('appointment_time', '=', visit.appointment_time)
                 ], limit=1)
                 visit.schedule_id = schedule.id if schedule else False
 
@@ -71,7 +71,7 @@ class PatientVisits(models.Model):
             if self._context.get('skip_schedule_validation'):
                 continue
 
-            required_keys = ['physician_id', 'start_date', 'start_time']
+            required_keys = ['physician_id', 'appointment_date', 'appointment_time']
             if all(k in vals for k in required_keys):
                 # Lock the schedule slot first to prevent race conditions
                 self.env.cr.execute("""
@@ -82,14 +82,14 @@ class PatientVisits(models.Model):
                     FOR UPDATE NOWAIT
                 """, (
                     vals['physician_id'],
-                    vals['start_date'],
-                    vals['start_time']
+                    vals['appointment_date'],
+                    vals['appointment_time']
                 ))
 
                 existing = self.search([
                     ('physician_id', '=', vals['physician_id']),
-                    ('start_date', '=', vals['start_date']),
-                    ('start_time', '=', vals['start_time']),
+                    ('appointment_date', '=', vals['appointment_date']),
+                    ('appointment_time', '=', vals['appointment_time']),
                     ('state', 'not in', ['cancelled'])
                 ])
                 if existing:
@@ -99,10 +99,10 @@ class PatientVisits(models.Model):
 
             # Check if the patient is trying to create a duplicate appointment
             # on the same day
-            if 'patient_id' in vals and 'start_date' in vals:
+            if 'patient_id' in vals and 'appointment_date' in vals:
                 existing_appointment = self.search([
                     ('patient_id', '=', vals['patient_id']),
-                    ('start_date', '=', vals['start_date']),
+                    ('appointment_date', '=', vals['appointment_date']),
                     # Ignore cancelled appointments
                     ('state', 'not in', ['cancelled'])
                 ], limit=1)
@@ -115,14 +115,14 @@ class PatientVisits(models.Model):
 
         return super(PatientVisits, self).create(vals_list)
 
-    @api.constrains('start_time', 'start_date')
+    @api.constrains('appointment_time', 'appointment_date')
     def _check_appointment_time(self):
         for record in self:
             # Use mixin for common time validations
-            self._validate_time_slot(record.start_time)
+            self._validate_time_slot(record.appointment_time)
 
             # Check if it's a weekend
-            if record.start_date and record.start_date.weekday() > 4:
+            if record.appointment_date and record.appointment_date.weekday() > 4:
                 raise ValidationError(_(
                     'Appointments cannot be scheduled on weekends'
                 ))
@@ -130,20 +130,20 @@ class PatientVisits(models.Model):
             # If the date of the new appointment is in the past
             today = fields.Date.today()
             now = fields.Datetime.now()
-            if record.start_date < today or (
-                    record.start_date == today and
-                    record.start_time < now.hour + now.minute / 60):
+            if record.appointment_date < today or (
+                    record.appointment_date == today and
+                    record.appointment_time < now.hour + now.minute / 60):
                 raise ValidationError(_(
                     'You can not make an appointment in the past.'))
 
-    @api.constrains('physician_id', 'start_date', 'start_time', 'state')
+    @api.constrains('physician_id', 'appointment_date', 'appointment_time', 'state')
     def _check_physician_availability(self):
         for record in self:
             if record.state not in ['draft', 'cancelled']:
                 schedule = self.env['hr.hospital.physician.schedule'].search([
                     ('physician_id', '=', record.physician_id.id),
-                    ('appointment_date', '=', record.start_date),
-                    ('appointment_time', '=', record.start_time)
+                    ('appointment_date', '=', record.appointment_date),
+                    ('appointment_time', '=', record.appointment_time)
                 ])
                 if not schedule:
                     raise ValidationError(_(
@@ -154,8 +154,8 @@ class PatientVisits(models.Model):
                 other_visit = self.search([
                     ('id', '!=', record.id),
                     ('physician_id', '=', record.physician_id.id),
-                    ('start_date', '=', record.start_date),
-                    ('start_time', '=', record.start_time),
+                    ('appointment_date', '=', record.appointment_date),
+                    ('appointment_time', '=', record.appointment_time),
                     ('state', 'not in', ['cancelled'])
                 ])
                 if other_visit:
@@ -174,7 +174,7 @@ class PatientVisits(models.Model):
                 AND appointment_date = %s
                 AND appointment_time = %s
                 FOR UPDATE NOWAIT
-            """, (self.physician_id.id, self.start_date, self.start_time))
+            """, (self.physician_id.id, self.appointment_date, self.appointment_time))
 
             if not self.schedule_id:
                 raise ValidationError(_(
@@ -217,15 +217,15 @@ class PatientVisits(models.Model):
 
         for record in self:
             # Check if the appointment has already taken place
-            if record.start_date < current_datetime.date() or (
-                record.start_date == current_datetime.date() and
-                record.start_time < current_datetime.hour
+            if record.appointment_date < current_datetime.date() or (
+                record.appointment_date == current_datetime.date() and
+                record.appointment_time < current_datetime.hour
                     + current_datetime.minute / 60):
 
                 # If the appointment has passed, prohibit changes
                 # to the date, time, physician, or patient
                 if any(field in vals for field in [
-                        'start_date', 'start_time',
+                        'appointment_date', 'appointment_time',
                         'physician_id', 'patient_id']):
                     raise ValidationError(_(
                         'This appointment has already taken '
