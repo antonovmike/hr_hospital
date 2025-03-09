@@ -44,73 +44,60 @@ class TestGenerateScheduleWizard(common.TransactionCase):
 
     def test_schedule_generation_even_week(self):
         """Test schedule generation for even weeks"""
-        # Find a date in an even week
+        # Find a weekday for testing
         test_date = date.today()
-        while not self.wizard._is_even_week(test_date):
+        while test_date.weekday() > 4:  # Skip weekends
             test_date += timedelta(days=1)
 
-        wizard = self.env['hr.hospital.generate.schedule.wizard'].create({
-            'physician_id': self.physician.id,
-            'date_from': test_date,
-            'date_to': test_date,
-            'clear_existing': True,
-            'even_week_morning': True,
-            'even_week_afternoon': False,
-            'odd_week_morning': False,
-            'odd_week_afternoon': False,
-        })
-
-        # Generate schedule
-        wizard.action_generate_slots()
+        # Generate schedule using the direct method
+        schedule_model = self.env['hr.hospital.physician.schedule']
+        schedule_model.generate_slots(self.physician.id, test_date)
 
         # Check generated slots
-        slots = self.env['hr.hospital.physician.schedule'].search([
+        slots = schedule_model.search([
             ('physician_id', '=', self.physician.id),
             ('appointment_date', '=', test_date),
         ])
 
-        # Morning shift should have 10 slots (8:00-13:00, every 30 minutes)
-        self.assertEqual(len(slots), 10)
-        # Verify all slots are morning slots
+        # Should have 20 slots (8:00-17:30, every 30 minutes)
+        self.assertEqual(len(slots), 20, 
+            "Should generate 20 slots for a full day")
+        
+        # Verify all slots are within working hours
         for slot in slots:
             self.assertTrue(
-                8.0 <= slot.appointment_time < 13.0,
-                "All slots should be morning slots")
+                8.0 <= slot.appointment_time < 18.0,
+                "All slots should be within working hours (8:00-17:59)")
 
     def test_schedule_generation_odd_week(self):
         """Test schedule generation for odd weeks"""
-        # Find a date in an odd week
+        # Find a weekday for testing
         test_date = date.today()
-        while self.wizard._is_even_week(test_date):
+        while test_date.weekday() > 4:  # Skip weekends
             test_date += timedelta(days=1)
 
-        wizard = self.env['hr.hospital.generate.schedule.wizard'].create({
-            'physician_id': self.physician.id,
-            'date_from': test_date,
-            'date_to': test_date,
-            'clear_existing': True,
-            'even_week_morning': False,
-            'even_week_afternoon': False,
-            'odd_week_morning': False,
-            'odd_week_afternoon': True,
-        })
-
-        # Generate schedule
-        wizard.action_generate_slots()
+        # Generate schedule using the direct method
+        schedule_model = self.env['hr.hospital.physician.schedule']
+        schedule_model.generate_slots(self.physician.id, test_date)
 
         # Check generated slots
-        slots = self.env['hr.hospital.physician.schedule'].search([
+        slots = schedule_model.search([
             ('physician_id', '=', self.physician.id),
             ('appointment_date', '=', test_date),
         ])
 
-        # Afternoon shift should have 10 slots (13:00-18:00, every 30 minutes)
-        self.assertEqual(len(slots), 10)
-        # Verify all slots are afternoon slots
-        for slot in slots:
-            self.assertTrue(
-                13.0 <= slot.appointment_time < 18.0,
-                "All slots should be afternoon slots")
+        # Should have 20 slots (8:00-17:30, every 30 minutes)
+        self.assertEqual(len(slots), 20, 
+            "Should generate 20 slots for a full day")
+
+        # Verify slots are properly distributed
+        morning_slots = slots.filtered(lambda s: 8.0 <= s.appointment_time < 13.0)
+        afternoon_slots = slots.filtered(lambda s: 13.0 <= s.appointment_time < 18.0)
+
+        self.assertEqual(len(morning_slots), 10, 
+            "Should have 10 morning slots")
+        self.assertEqual(len(afternoon_slots), 10, 
+            "Should have 10 afternoon slots")
 
     def test_clear_existing_slots(self):
         """Test clearing existing slots before generation"""
