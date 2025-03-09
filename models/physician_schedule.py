@@ -103,7 +103,7 @@ class PhysicianSchedule(models.Model):
             raise ValidationError(_('Physician not found'))
         if physician.is_intern:
             raise ValidationError(_('Cannot generate schedule for interns'))
-            
+
         if not target_date:
             target_date = fields.Date.today()
 

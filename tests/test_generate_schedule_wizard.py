@@ -60,9 +60,10 @@ class TestGenerateScheduleWizard(common.TransactionCase):
         ])
 
         # Should have 20 slots (8:00-17:30, every 30 minutes)
-        self.assertEqual(len(slots), 20, 
+        self.assertEqual(
+            len(slots), 20,
             "Should generate 20 slots for a full day")
-        
+
         # Verify all slots are within working hours
         for slot in slots:
             self.assertTrue(
@@ -87,16 +88,21 @@ class TestGenerateScheduleWizard(common.TransactionCase):
         ])
 
         # Should have 20 slots (8:00-17:30, every 30 minutes)
-        self.assertEqual(len(slots), 20, 
+        self.assertEqual(
+            len(slots), 20,
             "Should generate 20 slots for a full day")
 
         # Verify slots are properly distributed
-        morning_slots = slots.filtered(lambda s: 8.0 <= s.appointment_time < 13.0)
-        afternoon_slots = slots.filtered(lambda s: 13.0 <= s.appointment_time < 18.0)
+        morning_slots = slots.filtered(
+            lambda s: 8.0 <= s.appointment_time < 13.0)
+        afternoon_slots = slots.filtered(
+            lambda s: 13.0 <= s.appointment_time < 18.0)
 
-        self.assertEqual(len(morning_slots), 10, 
+        self.assertEqual(
+            len(morning_slots), 10,
             "Should have 10 morning slots")
-        self.assertEqual(len(afternoon_slots), 10, 
+        self.assertEqual(
+            len(afternoon_slots), 10,
             "Should have 10 afternoon slots")
 
     def test_clear_existing_slots(self):

@@ -96,7 +96,7 @@ class TestPhysician(TransactionCase):
         test_date = date.today()
         while test_date.weekday() != 0:
             test_date += timedelta(days=1)
-            
+
         # Create a new physician
         new_physician = self.env['hr.hospital.physician'].create({
             'name_first': 'New',
@@ -113,9 +113,10 @@ class TestPhysician(TransactionCase):
             ('physician_id', '=', new_physician.id),
             ('appointment_date', '=', test_date)
         ])
-        
+
         # Should have 20 slots for the day
-        self.assertEqual(len(slots), 20, "Should generate 20 slots for a full day")
+        self.assertEqual(
+            len(slots), 20, "Should generate 20 slots for a full day")
 
         # Verify slots are properly distributed
         for slot in slots:
@@ -141,7 +142,7 @@ class TestPhysician(TransactionCase):
         test_date = date.today()
         while test_date.weekday() != 0:
             test_date += timedelta(days=1)
-            
+
         # Promote intern to full physician
         self.intern.write({
             'is_intern': False,
@@ -156,7 +157,8 @@ class TestPhysician(TransactionCase):
             ('physician_id', '=', self.intern.id),
             ('appointment_date', '=', test_date)
         ])
-        self.assertEqual(len(slots), 20, "Should generate 20 slots for a full day")
+        self.assertEqual(
+            len(slots), 20, "Should generate 20 slots for a full day")
 
     def test_mentor_intern_relationship(self):
         """Test mentor-intern relationship and constraints."""
@@ -201,16 +203,17 @@ class TestPhysician(TransactionCase):
         test_date = date.today()
         while test_date.weekday() != 0:
             test_date += timedelta(days=1)
-            
+
         # Generate slots for regular physician
         self.Schedule.generate_slots(self.physician.id, test_date)
-        
+
         # Check slots for regular physician
         slots = self.Schedule.search([
             ('physician_id', '=', self.physician.id),
             ('appointment_date', '=', test_date)
         ])
-        self.assertEqual(len(slots), 20, "Should generate 20 slots for physician")
+        self.assertEqual(
+            len(slots), 20, "Should generate 20 slots for physician")
 
         # Try to generate slots for intern (should raise ValidationError)
         with self.assertRaises(ValidationError):
@@ -222,7 +225,7 @@ class TestPhysician(TransactionCase):
         test_date = date.today()
         while test_date.weekday() != 0:
             test_date += timedelta(days=1)
-            
+
         # Clear existing slots
         self.Schedule.search([
             ('physician_id', '=', self.physician.id),
@@ -231,13 +234,14 @@ class TestPhysician(TransactionCase):
 
         # Generate new slots
         self.Schedule.generate_slots(self.physician.id, test_date)
-        
+
         # Verify slots
         slots = self.Schedule.search([
             ('physician_id', '=', self.physician.id),
             ('appointment_date', '=', test_date)
         ])
-        self.assertEqual(len(slots), 20, "Should generate 20 slots for the day")
+        self.assertEqual(
+            len(slots), 20, "Should generate 20 slots for the day")
 
         # Check that slots were created
         slots = self.env['hr.hospital.physician.schedule'].search([

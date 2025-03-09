@@ -80,8 +80,12 @@ class PatientVisits(models.Model):
                     AND appointment_date = %s
                     AND appointment_time = %s
                     FOR UPDATE NOWAIT
-                """, (vals['physician_id'], vals['start_date'], vals['start_time']))
-                
+                """, (
+                    vals['physician_id'],
+                    vals['start_date'],
+                    vals['start_time']
+                ))
+
                 existing = self.search([
                     ('physician_id', '=', vals['physician_id']),
                     ('start_date', '=', vals['start_date']),
@@ -171,7 +175,7 @@ class PatientVisits(models.Model):
                 AND appointment_time = %s
                 FOR UPDATE NOWAIT
             """, (self.physician_id.id, self.start_date, self.start_time))
-            
+
             if not self.schedule_id:
                 raise ValidationError(_(
                     'No available slot found in physician\'s schedule'
