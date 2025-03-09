@@ -28,6 +28,25 @@ class PhysicianSchedule(models.Model):
         required=True,
         help='24-hour format (e.g., 13.5 for 1:30 PM)'
     )
+    visit_ids = fields.One2many(
+        'hr.hospital.patient.visits',
+        'schedule_id',
+        string='Visits',
+        help='Visits scheduled for this time slot'
+    )
+    is_available = fields.Boolean(
+        string='Is Available',
+        compute='_compute_is_available',
+        help='Indicates if this time slot is available for scheduling'
+    )
+
+    @api.depends('visit_ids.state')
+    def _compute_is_available(self):
+        for record in self:
+            # A slot is available if it has no visits or all visits are cancelled
+            record.is_available = not bool(record.visit_ids.filtered(
+                lambda v: v.state != 'cancelled'
+            ))
 
     @api.constrains('appointment_time')
     def _check_appointment_time(self):
