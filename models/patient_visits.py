@@ -136,32 +136,40 @@ class PatientVisits(models.Model):
                 raise ValidationError(_(
                     'You can not make an appointment in the past.'))
 
-    @api.constrains('physician_id', 'appointment_date', 'appointment_time', 'state')
+    @api.constrains('physician_id', 'appointment_date', 'appointment_time')
     def _check_physician_availability(self):
+        """Validate that the appointment matches an available physician schedule slot.
+        This check runs for ALL states (including draft) to ensure data integrity.
+        
+        The validation ensures:
+        1. A schedule slot exists for the physician at the given time
+        2. No other non-cancelled visits exist for this slot
+        """
         for record in self:
-            if record.state not in ['draft', 'cancelled']:
-                schedule = self.env['hr.hospital.physician.schedule'].search([
-                    ('physician_id', '=', record.physician_id.id),
-                    ('appointment_date', '=', record.appointment_date),
-                    ('appointment_time', '=', record.appointment_time)
-                ])
-                if not schedule:
-                    raise ValidationError(_(
-                        'Selected time slot is not available in physician\'s '
-                        'schedule'
-                    ))
+            # Always check for schedule availability, regardless of state
+            schedule = self.env['hr.hospital.physician.schedule'].search([
+                ('physician_id', '=', record.physician_id.id),
+                ('appointment_date', '=', record.appointment_date),
+                ('appointment_time', '=', record.appointment_time)
+            ])
+            if not schedule:
+                raise ValidationError(_(
+                    'Selected time slot is not available in physician\'s '
+                    'schedule. Please check the physician\'s schedule first.'
+                ))
 
-                other_visit = self.search([
-                    ('id', '!=', record.id),
-                    ('physician_id', '=', record.physician_id.id),
-                    ('appointment_date', '=', record.appointment_date),
-                    ('appointment_time', '=', record.appointment_time),
-                    ('state', 'not in', ['cancelled'])
-                ])
-                if other_visit:
-                    raise ValidationError(_(
-                        'This time slot is already booked for another patient'
-                    ))
+            # Check for conflicting visits (excluding cancelled ones and self)
+            other_visit = self.search([
+                ('id', '!=', record.id),
+                ('physician_id', '=', record.physician_id.id),
+                ('appointment_date', '=', record.appointment_date),
+                ('appointment_time', '=', record.appointment_time),
+                ('state', 'not in', ['cancelled'])
+            ])
+            if other_visit:
+                raise ValidationError(_(
+                    'This time slot is already booked for another patient'
+                ))
 
     def action_schedule(self):
         self.ensure_one()
