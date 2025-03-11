@@ -10,7 +10,8 @@
                     <button name="%(wizard_generate_schedule_action)d"
                             string="Generate Schedule"
                             type="action"
-                            class="btn-primary"/>
+                            class="btn-primary"
+                            display="always"/>
                 </header>
                 <field name="physician_id"/>
                 <field name="appointment_date"/>
