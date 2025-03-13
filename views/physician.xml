@@ -7,9 +7,10 @@
     <field name="arch" type="xml">
       <tree>
         <field name="display_name"/>
+        <field name="image_128" widget="image" width="64"/>
+        <field name="specialty"/>
         <field name="is_intern"/>
         <field name="mentor_id"/>
-        <field name="specialty"/>
         <field name="phone"/>
         <field name="email"/>
       </tree>
@@ -20,7 +21,7 @@
     <field name="name">hr.hospital.physician.form</field>
     <field name="model">hr.hospital.physician</field>
     <field name="arch" type="xml">
-      <form string="Physician">
+      <form>
         <header>
           <button name="generate_schedule_slots" 
                   string="Generate Schedule Slots" 
@@ -29,24 +30,32 @@
                   invisible="is_intern"/>
         </header>
         <sheet>
+          <field name="image_1920" widget="image" class="oe_avatar"/>
+          <div class="oe_title">
+            <h1>
+              <field name="display_name" readonly="1"/>
+            </h1>
+          </div>
           <group>
-            <group>
-              <field name="name_first"/>
-              <field name="name_last"/>
-              <field name="specialty"/>
+            <group string="Personal Information">
+              <field name="name_first" required="1"/>
+              <field name="name_last" required="1"/>
+              <field name="gender" required="1"/>
+              <field name="specialty" required="1"/>
               <field name="is_intern"/>
               <field name="mentor_id" invisible="not is_intern" required="is_intern"/>
             </group>
-            <group>
-              <field name="phone"/>
-              <field name="email"/>
-              <field name="gender"/>
+            <group string="Contact Information">
+              <field name="phone" widget="phone"/>
+              <field name="mobile" widget="phone"/>
+              <field name="email" widget="email"/>
             </group>
           </group>
           <notebook>
             <page string="Interns" invisible="is_intern">
               <field name="intern_ids" readonly="1">
                 <tree>
+                  <field name="image_128" widget="image"/>
                   <field name="display_name"/>
                   <field name="specialty"/>
                   <field name="phone"/>
@@ -57,6 +66,7 @@
             <page string="Patients">
               <field name="patient_ids">
                 <tree>
+                  <field name="image_128" widget="image"/>
                   <field name="display_name"/>
                   <field name="date_of_birth"/>
                   <field name="phone"/>
@@ -66,18 +76,51 @@
             </page>
           </notebook>
         </sheet>
+        <div class="oe_chatter">
+          <field name="message_follower_ids" widget="mail_followers"/>
+          <field name="message_ids" widget="mail_thread"/>
+          <field name="activity_ids" widget="mail_activity"/>
+        </div>
       </form>
     </field>
   </record>
 
+  <record id="hr_hospital_physician_search" model="ir.ui.view">
+    <field name="name">hr.hospital.physician.search</field>
+    <field name="model">hr.hospital.physician</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="display_name"/>
+        <field name="name_first"/>
+        <field name="name_last"/>
+        <field name="phone"/>
+        <field name="email"/>
+        <field name="specialty"/>
+        <separator/>
+        <filter string="Interns" name="interns" domain="[('is_intern', '=', True)]"/>
+        <filter string="Senior Physicians" name="seniors" domain="[('is_intern', '=', False)]"/>
+        <separator/>
+        <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+        <group expand="0" string="Group By">
+          <filter string="Specialty" name="specialty" context="{'group_by': 'specialty'}"/>
+          <filter string="Mentor" name="mentor" context="{'group_by': 'mentor_id'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
 
   <record id="hr_hospital_physician_act_window" model="ir.actions.act_window">
-    <field name="name">Physician</field>
+    <field name="name">Physicians</field>
     <field name="type">ir.actions.act_window</field>
     <field name="res_model">hr.hospital.physician</field>
     <field name="view_mode">tree,form</field>
+    <field name="search_view_id" ref="hr_hospital_physician_search"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        Create your first physician!
+      </p>
+    </field>
   </record>
-
 
   <menuitem id="hr_hospital_physician_menu"
             action="hr_hospital_physician_act_window"

@@ -9,7 +9,7 @@
         <field name="display_name"/>
         <field name="phone"/>
         <field name="email"/>
-        <field name="image_128" widget="image"/>
+        <field name="image_128" widget="image" width="64"/>
         <field name="gender"/>
         <field name="personal_physician"/>
         <field name="disease_ids" widget="many2many_tags"/>
