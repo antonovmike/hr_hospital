@@ -6,19 +6,16 @@
     <field name="model">hr.hospital.patient</field>
     <field name="arch" type="xml">
       <tree>
-        <field name="name_first"/>
-        <field name="name_last"/>
+        <field name="display_name"/>
         <field name="phone"/>
         <field name="email"/>
-        <field name="photo"/>
+        <field name="image_128" widget="image"/>
         <field name="gender"/>
         <field name="personal_physician"/>
-        <field name="disease_ids"/>
-
+        <field name="disease_ids" widget="many2many_tags"/>
         <field name="date_of_birth"/>
         <field name="age"/>
-        <field name="passport_details"/>
-        <field name="contact_person"/>
+        <field name="visit_ids" string="Visit Count"/>
       </tree>
     </field>
   </record>
@@ -27,40 +24,111 @@
     <field name="name">hr.hospital.patient.form</field>
     <field name="model">hr.hospital.patient</field>
     <field name="arch" type="xml">
-      <form string="">
+      <form>
         <header></header>
         <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button name="action_view_visits" 
+                    type="object" 
+                    class="oe_stat_button" 
+                    icon="fa-calendar">
+              <field name="visit_ids" string="Visits" widget="statinfo"/>
+            </button>
+          </div>
+          <field name="image_1920" widget="image" class="oe_avatar"/>
+          <div class="oe_title">
+            <h1>
+              <field name="display_name" readonly="1"/>
+            </h1>
+            <div name="next_appointment_div" invisible="not next_appointment_date" class="text-muted">
+              Next Appointment: 
+              <field name="next_appointment_date" readonly="1"/> 
+              <field name="next_appointment_time" readonly="1" widget="float_time"/>
+            </div>
+          </div>
           <group>
-            <field name="name_first"/>
-            <field name="name_last"/>
-            <field name="phone"/>
-            <field name="email"/>
-            <field name="photo"/>
-            <field name="gender"/>
-            <field name="personal_physician" widget="many2one_tags"/>
-            <field name="disease_ids" widget="many2many_tags"/>
-
-            <field name="date_of_birth"/>
-            <field name="age"/>
-            <field name="passport_details"/>
-            <field name="contact_person"/>
+            <group string="Personal Information">
+              <field name="name_first" required="1"/>
+              <field name="name_last" required="1"/>
+              <field name="gender" required="1"/>
+              <field name="date_of_birth" required="1"/>
+              <field name="age"/>
+              <field name="passport_details"/>
+            </group>
+            <group string="Contact Information">
+              <field name="phone" widget="phone"/>
+              <field name="mobile" widget="phone"/>
+              <field name="email" widget="email"/>
+              <field name="contact_person"/>
+              <field name="personal_physician"/>
+              <field name="disease_ids" widget="many2many_tags"/>
+            </group>
           </group>
+          <notebook>
+            <page string="Visits" name="visits">
+              <field name="visit_ids" readonly="1">
+                <tree>
+                  <field name="appointment_date"/>
+                  <field name="appointment_time" widget="float_time"/>
+                  <field name="physician_id"/>
+                  <field name="state"/>
+                </tree>
+              </field>
+            </page>
+          </notebook>
         </sheet>
+        <div class="oe_chatter">
+          <field name="message_follower_ids" widget="mail_followers"/>
+          <field name="message_ids" widget="mail_thread"/>
+          <field name="activity_ids" widget="mail_activity"/>
+        </div>
       </form>
     </field>
   </record>
 
+  <record id="hr_hospital_patient_search" model="ir.ui.view">
+    <field name="name">hr.hospital.patient.search</field>
+    <field name="model">hr.hospital.patient</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="display_name"/>
+        <field name="name_first"/>
+        <field name="name_last"/>
+        <field name="phone"/>
+        <field name="email"/>
+        <field name="personal_physician"/>
+        <field name="disease_ids"/>
+        <separator/>
+        <filter string="Male" name="male" domain="[('gender', '=', 'male')]"/>
+        <filter string="Female" name="female" domain="[('gender', '=', 'female')]"/>
+        <filter string="Has Visits" name="has_visits" domain="[('visit_ids', '!=', False)]"/>
+        <separator/>
+        <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+        <group expand="0" string="Group By">
+          <filter string="Gender" name="gender" context="{'group_by': 'gender'}"/>
+          <filter string="Primary Physician" name="physician" context="{'group_by': 'personal_physician'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
   <record id="hr_hospital_patient_act_window" model="ir.actions.act_window">
-    <field name="name">Patient</field>
+    <field name="name">Patients</field>
     <field name="type">ir.actions.act_window</field>
     <field name="res_model">hr.hospital.patient</field>
     <field name="view_mode">tree,form</field>
+    <field name="search_view_id" ref="hr_hospital_patient_search"/>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        Create your first patient!
+      </p>
+    </field>
   </record>
 
   <menuitem id="hr_hospital_patient_menu"
             action="hr_hospital_patient_act_window"
             parent="hr_hospital_catalog_menu"
-            name="Patient"
+            name="Patients"
             sequence="300"/>
 
 </odoo>
