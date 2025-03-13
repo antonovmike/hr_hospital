@@ -9,7 +9,7 @@ _logger = logging.getLogger(__name__)
 
 class Patient(models.Model):
     _name = 'hr.hospital.patient'
-    _inherit = 'hr_hospital.person'
+    _inherit = 'hr.hospital.person'
     _description = 'Patient'
 
     date_of_birth = fields.Date()
