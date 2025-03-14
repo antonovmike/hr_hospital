@@ -43,7 +43,8 @@ class PhysicianSchedule(models.Model):
     @api.depends('visit_ids.state')
     def _compute_is_available(self):
         for record in self:
-            # A slot is available if it has no visits or all visits are cancelled
+            # A slot is available if it has no visits
+            # or all visits are cancelled
             record.is_available = not bool(record.visit_ids.filtered(
                 lambda v: v.state != 'cancelled'
             ))
