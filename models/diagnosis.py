@@ -10,18 +10,21 @@ class Diagnosis(models.Model):
     _name = 'hr.hospital.diagnosis'
     _description = 'Diagnosis'
 
-    date_of_diagnosis = fields.Date(required=True)
+    date_of_diagnosis = fields.Date(required=True, index=True)
     physician = fields.Many2one(
         comodel_name='hr.hospital.physician',
-        required=True
+        required=True,
+        index=True
     )
     patient_id = fields.Many2one(
         comodel_name='hr.hospital.patient',
-        required=True
+        required=True,
+        index=True
     )
     disease_id = fields.Many2one(
         comodel_name='hr.hospital.disease',
-        required=True
+        required=True,
+        index=True
     )
     treatment_recommendations = fields.Text(required=True)
 

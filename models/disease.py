@@ -13,7 +13,7 @@ class DiseaseCategory(models.Model):
          _('A category with this name already exists!')),
     ]
 
-    name = fields.Char(string='Category Name', required=True)
+    name = fields.Char(string='Category Name', required=True, index=True)
     disease_ids = fields.One2many(
         'hr.hospital.disease',
         'category_id',
@@ -29,9 +29,10 @@ class Disease(models.Model):
          _('A disease with this name already exists!')),
     ]
 
-    name = fields.Char(string='Disease Name', required=True)
+    name = fields.Char(string='Disease Name', required=True, index=True)
     category_id = fields.Many2one(
         'hr.hospital.disease.category',
         string='Disease Category',
-        required=True
+        required=True,
+        index=True
     )
