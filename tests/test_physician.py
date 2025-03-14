@@ -5,10 +5,23 @@ from odoo.exceptions import ValidationError
 
 class TestPhysician(TransactionCase):
 
+    def _create_physician(self, values):
+        """Helper method to create a physician with required fields."""
+        default_values = {
+            'name_first': 'Test',
+            'name_last': 'Doctor',
+            'specialty': 'General Practice',
+            'is_intern': False,
+            'gender': 'male',
+            'phone': '1234567890',
+            'email': 'test@example.com'
+        }
+        return self.env['hr.hospital.physician'].create({**default_values, **values})
+
     def setUp(self):
         super().setUp()
         # Create a regular physician
-        self.physician = self.env['hr.hospital.physician'].create({
+        self.physician = self._create_physician({
             'name_first': 'Test',
             'name_last': 'Physician',
             'specialty': 'General Practice',
@@ -16,7 +29,7 @@ class TestPhysician(TransactionCase):
         })
 
         # Create an intern with a mentor
-        self.intern = self.env['hr.hospital.physician'].create({
+        self.intern = self._create_physician({
             'name_first': 'Test',
             'name_last': 'Intern',
             'specialty': 'Internal Medicine',
@@ -53,7 +66,7 @@ class TestPhysician(TransactionCase):
     def test_intern_without_mentor(self):
         """Test that interns must have a mentor."""
         with self.assertRaises(ValidationError):
-            self.env['hr.hospital.physician'].create({
+            self._create_physician({
                 'name_first': 'Intern',
                 'name_last': 'Without Mentor',
                 'specialty': 'Internal Medicine',
@@ -63,7 +76,7 @@ class TestPhysician(TransactionCase):
     def test_non_intern_with_mentor(self):
         """Test that regular physicians cannot have mentors."""
         with self.assertRaises(ValidationError):
-            self.env['hr.hospital.physician'].create({
+            self._create_physician({
                 'name_first': 'Physician',
                 'name_last': 'With Mentor',
                 'specialty': 'Surgery',
@@ -74,7 +87,7 @@ class TestPhysician(TransactionCase):
     def test_intern_as_mentor(self):
         """Test that interns cannot be mentors."""
         with self.assertRaises(ValidationError):
-            self.env['hr.hospital.physician'].create({
+            self._create_physician({
                 'name_first': 'Another',
                 'name_last': 'Intern',
                 'specialty': 'Internal Medicine',
@@ -98,7 +111,7 @@ class TestPhysician(TransactionCase):
             test_date += timedelta(days=1)
 
         # Create a new physician
-        new_physician = self.env['hr.hospital.physician'].create({
+        new_physician = self._create_physician({
             'name_first': 'New',
             'name_last': 'Doctor',
             'specialty': 'Surgery',
@@ -166,7 +179,7 @@ class TestPhysician(TransactionCase):
         self.assertIn(self.intern, self.physician.intern_ids)
 
         # Create another intern for same mentor
-        another_intern = self.env['hr.hospital.physician'].create({
+        another_intern = self._create_physician({
             'name_first': 'Another',
             'name_last': 'Intern',
             'specialty': 'Internal Medicine',

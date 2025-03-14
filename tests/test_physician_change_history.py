@@ -3,18 +3,29 @@ from odoo.tests.common import TransactionCase
 
 
 class TestPhysicianChangeHistory(TransactionCase):
+    def _create_person(self, model, values):
+        """Helper method to create a person (patient or physician) with required fields."""
+        default_values = {
+            'name_first': 'Test',
+            'name_last': 'Person',
+            'gender': 'male',
+            'phone': '1234567890',
+            'email': 'test@example.com'
+        }
+        return self.env[model].create({**default_values, **values})
+
     def setUp(self):
         super().setUp()
 
         # Create test physicians
-        self.physician_1 = self.env['hr.hospital.physician'].create({
+        self.physician_1 = self._create_person('hr.hospital.physician', {
             'name_first': 'John',
             'name_last': 'Doe',
             'specialty': 'General Practice',
             'is_intern': False
         })
 
-        self.physician_2 = self.env['hr.hospital.physician'].create({
+        self.physician_2 = self._create_person('hr.hospital.physician', {
             'name_first': 'Jane',
             'name_last': 'Smith',
             'specialty': 'Pediatrics',
@@ -23,7 +34,7 @@ class TestPhysicianChangeHistory(TransactionCase):
 
     def test_create_history_record(self):
         """Test creating a physician change history record"""
-        patient = self.env['hr.hospital.patient'].create({
+        patient = self._create_person('hr.hospital.patient', {
             'name_first': 'Test',
             'name_last': 'Patient',
             'date_of_birth': '1990-01-01'
@@ -40,7 +51,7 @@ class TestPhysicianChangeHistory(TransactionCase):
 
     def test_multiple_changes(self):
         """Test multiple physician changes for the same patient"""
-        patient = self.env['hr.hospital.patient'].create({
+        patient = self._create_person('hr.hospital.patient', {
             'name_first': 'Test',
             'name_last': 'Patient',
             'date_of_birth': '1990-01-01'
@@ -68,7 +79,7 @@ class TestPhysicianChangeHistory(TransactionCase):
     def test_ordering(self):
         """Test that records are ordered by date_established
         in descending order"""
-        patient = self.env['hr.hospital.patient'].create({
+        patient = self._create_person('hr.hospital.patient', {
             'name_first': 'Test',
             'name_last': 'Patient',
             'date_of_birth': '1990-01-01'
@@ -103,7 +114,7 @@ class TestPhysicianChangeHistory(TransactionCase):
 
     def test_required_fields(self):
         """Test that required fields are enforced"""
-        patient = self.env['hr.hospital.patient'].create({
+        patient = self._create_person('hr.hospital.patient', {
             'name_first': 'Test',
             'name_last': 'Patient',
             'date_of_birth': '1990-01-01'
@@ -127,7 +138,7 @@ class TestPhysicianChangeHistory(TransactionCase):
 
     def test_patient_physician_relation(self):
         """Test the relationships between history records and related models"""
-        patient = self.env['hr.hospital.patient'].create({
+        patient = self._create_person('hr.hospital.patient', {
             'name_first': 'Test',
             'name_last': 'Patient',
             'date_of_birth': '1990-01-01'
@@ -149,7 +160,7 @@ class TestPhysicianChangeHistory(TransactionCase):
     def test_patient_create_with_physician(self):
         """Test history record creation when creating patient with physician"""
         # Create new patient with physician
-        new_patient = self.env['hr.hospital.patient'].create({
+        new_patient = self._create_person('hr.hospital.patient', {
             'name_first': 'New',
             'name_last': 'Patient',
             'date_of_birth': '1995-01-01',
@@ -169,7 +180,7 @@ class TestPhysicianChangeHistory(TransactionCase):
     def test_patient_create_without_physician(self):
         """Test no history record when creating patient without physician"""
         # Create new patient without physician
-        new_patient = self.env['hr.hospital.patient'].create({
+        new_patient = self._create_person('hr.hospital.patient', {
             'name_first': 'New',
             'name_last': 'Patient',
             'date_of_birth': '1995-01-01',
@@ -185,7 +196,7 @@ class TestPhysicianChangeHistory(TransactionCase):
     def test_patient_physician_change(self):
         """Test history record creation when changing patient's physician"""
         # Create new patient with initial physician
-        patient = self.env['hr.hospital.patient'].create({
+        patient = self._create_person('hr.hospital.patient', {
             'name_first': 'Test',
             'name_last': 'Patient',
             'date_of_birth': '1995-01-01',
@@ -234,7 +245,7 @@ class TestPhysicianChangeHistory(TransactionCase):
         import time
 
         # Create additional test physician
-        physician_3 = self.env['hr.hospital.physician'].create({
+        physician_3 = self._create_person('hr.hospital.physician', {
             'name_first': 'Bob',
             'name_last': 'Johnson',
             'specialty': 'Surgery',
@@ -242,7 +253,7 @@ class TestPhysicianChangeHistory(TransactionCase):
         })
 
         # Create two test patients with initial physicians
-        patient_1 = self.env['hr.hospital.patient'].create({
+        patient_1 = self._create_person('hr.hospital.patient', {
             'name_first': 'Alice',
             'name_last': 'Brown',
             'date_of_birth': '1990-01-01',
@@ -250,7 +261,7 @@ class TestPhysicianChangeHistory(TransactionCase):
         })
         time.sleep(1)  # Ensure distinct timestamps
 
-        patient_2 = self.env['hr.hospital.patient'].create({
+        patient_2 = self._create_person('hr.hospital.patient', {
             'name_first': 'Charlie',
             'name_last': 'Davis',
             'date_of_birth': '1985-05-15',

@@ -4,10 +4,23 @@ from odoo.exceptions import ValidationError
 
 
 class TestGenerateScheduleWizard(common.TransactionCase):
+    def _create_physician(self, values):
+        """Helper method to create a physician with required fields."""
+        default_values = {
+            'name_first': 'Test',
+            'name_last': 'Doctor',
+            'specialty': 'General Practice',
+            'is_intern': False,
+            'gender': 'male',
+            'phone': '1234567890',
+            'email': 'test@example.com'
+        }
+        return self.env['hr.hospital.physician'].create({**default_values, **values})
+
     def setUp(self):
         super().setUp()
         # Create a regular physician
-        self.physician = self.env['hr.hospital.physician'].create({
+        self.physician = self._create_physician({
             'name_first': 'Dr. John',
             'name_last': 'Smith',
             'is_intern': False,
@@ -158,14 +171,14 @@ class TestGenerateScheduleWizard(common.TransactionCase):
     def test_intern_creation_and_validation(self):
         """Test intern creation and schedule generation validation"""
         # First create a mentor
-        mentor = self.env['hr.hospital.physician'].create({
+        mentor = self._create_physician({
             'name_first': 'Dr. Mentor',
             'name_last': 'Senior',
             'is_intern': False,
         })
 
         # Create an intern with mentor
-        intern = self.env['hr.hospital.physician'].create({
+        intern = self._create_physician({
             'name_first': 'Dr. Intern',
             'name_last': 'Junior',
             'is_intern': True,

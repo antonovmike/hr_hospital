@@ -4,11 +4,22 @@ from odoo.exceptions import ValidationError
 
 
 class TestDiagnosis(TransactionCase):
+    def _create_person(self, model, values):
+        """Helper method to create a person (patient or physician) with required fields."""
+        default_values = {
+            'name_first': 'Test',
+            'name_last': 'Person',
+            'gender': 'male',
+            'phone': '1234567890',
+            'email': 'test@example.com'
+        }
+        return self.env[model].create({**default_values, **values})
+
     def setUp(self):
         super().setUp()
 
         # Create test physician
-        self.physician = self.env['hr.hospital.physician'].create({
+        self.physician = self._create_person('hr.hospital.physician', {
             'name_first': 'Test',
             'name_last': 'Physician',
             'specialty': 'General Practice',
@@ -16,7 +27,7 @@ class TestDiagnosis(TransactionCase):
         })
 
         # Create test patient
-        self.patient = self.env['hr.hospital.patient'].create({
+        self.patient = self._create_person('hr.hospital.patient', {
             'name_first': 'Test',
             'name_last': 'Patient',
             'date_of_birth': date(1990, 1, 1)
@@ -42,7 +53,7 @@ class TestDiagnosis(TransactionCase):
             'category_id': self.disease_category_2.id})
 
         # Create mentor physician
-        self.mentor = self.env['hr.hospital.physician'].create({
+        self.mentor = self._create_person('hr.hospital.physician', {
             'name_first': 'Senior',
             'name_last': 'Doctor',
             'specialty': 'Surgery',
@@ -63,7 +74,7 @@ class TestDiagnosis(TransactionCase):
         })
 
         # Create intern physician
-        self.intern = self.env['hr.hospital.physician'].create({
+        self.intern = self._create_person('hr.hospital.physician', {
             'name_first': 'Junior',
             'name_last': 'Doctor',
             'specialty': 'Surgery',
@@ -72,7 +83,7 @@ class TestDiagnosis(TransactionCase):
         })
 
         # Create regular physician
-        self.physician_2 = self.env['hr.hospital.physician'].create({
+        self.physician_2 = self._create_person('hr.hospital.physician', {
             'name_first': 'Regular',
             'name_last': 'Doctor',
             'specialty': 'Surgery',
@@ -80,7 +91,7 @@ class TestDiagnosis(TransactionCase):
         })
 
         # Create patient
-        self.patient_2 = self.env['hr.hospital.patient'].create({
+        self.patient_2 = self._create_person('hr.hospital.patient', {
             'name_first': 'Test',
             'name_last': 'Patient 2',
             'date_of_birth': date(1990, 1, 1)
@@ -216,7 +227,7 @@ class TestDiagnosis(TransactionCase):
     def test_wrong_mentor_review(self):
         """Test that only the assigned mentor can review a diagnosis"""
         # Create another mentor
-        another_mentor = self.env['hr.hospital.physician'].create({
+        another_mentor = self._create_person('hr.hospital.physician', {
             'name_first': 'Another',
             'name_last': 'Mentor',
             'specialty': 'Surgery',

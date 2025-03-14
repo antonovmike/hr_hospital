@@ -4,23 +4,34 @@ from odoo.exceptions import ValidationError
 
 
 class TestRescheduleAppointmentWizard(common.TransactionCase):
+    def _create_person(self, model, values):
+        """Helper method to create a person (patient or physician) with required fields."""
+        default_values = {
+            'name_first': 'Test',
+            'name_last': 'Person',
+            'gender': 'male',
+            'phone': '1234567890',
+            'email': 'test@example.com'
+        }
+        return self.env[model].create({**default_values, **values})
+
     def setUp(self):
         super().setUp()
         # Create a physician
-        self.physician = self.env['hr.hospital.physician'].create({
+        self.physician = self._create_person('hr.hospital.physician', {
             'name_first': 'Dr. John',
             'name_last': 'Smith',
             'is_intern': False,
         })
 
         # Create patients
-        self.patient = self.env['hr.hospital.patient'].create({
+        self.patient = self._create_person('hr.hospital.patient', {
             'name_first': 'Jane',
             'name_last': 'Doe',
             'date_of_birth': date(1990, 1, 1),
         })
 
-        self.patient2 = self.env['hr.hospital.patient'].create({
+        self.patient2 = self._create_person('hr.hospital.patient', {
             'name_first': 'John',
             'name_last': 'Smith',
             'date_of_birth': date(1985, 5, 15),
@@ -199,7 +210,6 @@ class TestRescheduleAppointmentWizard(common.TransactionCase):
         })
 
         # Try to reschedule to weekend
-        # (should fail due to appointment validation)
         wizard = self.env[
             'hr.hospital.reschedule.appointment.wizard'
         ].with_context(
@@ -215,6 +225,3 @@ class TestRescheduleAppointmentWizard(common.TransactionCase):
             msg="Should not be able to reschedule to weekend"
         ):
             wizard.action_reschedule()
-
-        # Clean up the weekend slot
-        weekend_slot.unlink()

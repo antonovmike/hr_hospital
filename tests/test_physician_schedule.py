@@ -9,10 +9,23 @@ from odoo.tools import mute_logger
 
 class TestPhysicianSchedule(TransactionCase):
 
+    def _create_physician(self, values):
+        """Helper method to create a physician with required fields."""
+        default_values = {
+            'name_first': 'Test',
+            'name_last': 'Doctor',
+            'specialty': 'General Practice',
+            'is_intern': False,
+            'gender': 'male',
+            'phone': '1234567890',
+            'email': 'test@example.com'
+        }
+        return self.env['hr.hospital.physician'].create({**default_values, **values})
+
     def setUp(self):
         super().setUp()
         # Create a test physician
-        self.physician = self.env['hr.hospital.physician'].create({
+        self.physician = self._create_physician({
             'name_first': 'John',
             'name_last': 'Smith',
             'specialty': 'General',
@@ -111,7 +124,7 @@ class TestPhysicianSchedule(TransactionCase):
     def test_generate_slots_validation(self):
         """Test validation rules for slot generation"""
         # Create a mentor for the intern
-        mentor = self.env['hr.hospital.physician'].create({
+        mentor = self._create_physician({
             'name_first': 'Senior',
             'name_last': 'Doctor',
             'specialty': 'General',
@@ -119,7 +132,7 @@ class TestPhysicianSchedule(TransactionCase):
         })
 
         # Test generating slots for intern
-        intern = self.env['hr.hospital.physician'].create({
+        intern = self._create_physician({
             'name_first': 'Intern',
             'name_last': 'Doctor',
             'specialty': 'General',
