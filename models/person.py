@@ -141,9 +141,9 @@ class Person(models.AbstractModel):
         domain = self._get_appointment_domain(
             physician_id, appointment_date, appointment_time
         )
-        
+
         # Check both schedule and visits
         schedule = self.env['hr.hospital.physician.schedule'].search_count(domain)
         visits = self.env['hr.hospital.patient.visits'].search_count(domain)
-        
+
         return bool(schedule or visits)

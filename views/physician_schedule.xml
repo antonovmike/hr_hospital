@@ -69,7 +69,13 @@
                 <filter string="Available Slots" name="available" domain="[('visit_ids', '=', False)]"/>
                 <filter string="Occupied Slots" name="occupied" domain="[('visit_ids', '!=', False)]"/>
                 <filter string="Today" name="today" domain="[('appointment_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
-                <filter string="This Week" name="this_week" domain="[('appointment_date', '>=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d')), ('appointment_date', '&lt;=', (context_today() + datetime.timedelta(days=6-context_today().weekday())).strftime('%Y-%m-%d'))]"/>
+                <filter 
+                    string="This Week"
+                    name="this_week"
+                    domain="[
+                        ('appointment_date', '>=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d')),
+                        ('appointment_date', '&lt;=', (context_today() + datetime.timedelta(days=6-context_today().weekday())).strftime('%Y-%m-%d'))
+                    ]"/>
                 <group expand="0" string="Group By">
                     <filter string="Physician" name="group_by_physician" context="{'group_by': 'physician_id'}"/>
                     <filter string="Date" name="group_by_date" context="{'group_by': 'appointment_date'}"/>
